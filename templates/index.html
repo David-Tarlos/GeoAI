@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoAI – Mensch vs. KI</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f1117;
+    color: #e0e0e0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: #1a1d27;
+    border-bottom: 1px solid #2a2d3a;
+    flex-shrink: 0;
+    z-index: 100;
+  }
+  header h1 { font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: 1px; }
+  header h1 span { color: #6c8aff; }
+
+  .score-board {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+  }
+  .score-item {
+    text-align: center;
+  }
+  .score-item .label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+  }
+  .score-item .value {
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  .score-item.player .value { color: #4ade80; }
+  .score-item.ai     .value { color: #f87171; }
+  .score-item.round  .value { color: #facc15; }
+
+  /* ── Main game area ── */
+  #game {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Image panel ── */
+  #image-panel {
+    flex: 0 0 60%;
+    position: relative;
+    background: #000;
+    overflow: hidden;
+  }
+  #street-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #loading-overlay {
+    position: absolute; inset: 0;
+    background: #0f1117;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 10;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid #2a2d3a;
+    border-top-color: #6c8aff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading-overlay p { color: #888; font-size: 0.85rem; }
+
+  /* ── Map panel ── */
+  #map-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  #map {
+    flex: 1;
+    cursor: crosshair;
+  }
+  .map-hint {
+    position: absolute;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15,17,23,0.85);
+    border: 1px solid #2a2d3a;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.78rem;
+    color: #aaa;
+    pointer-events: none;
+    z-index: 500;
+    white-space: nowrap;
+  }
+
+  /* ── Submit bar ── */
+  #submit-bar {
+    padding: 12px 16px;
+    background: #1a1d27;
+    border-top: 1px solid #2a2d3a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  #guess-info {
+    flex: 1;
+    font-size: 0.8rem;
+    color: #666;
+  }
+  #guess-info.active { color: #aaa; }
+  #submit-btn {
+    padding: 10px 28px;
+    background: #6c8aff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  #submit-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  #submit-btn:not(:disabled):hover { background: #8aa3ff; }
+
+  /* ── Result overlay ── */
+  #result-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  #result-overlay.show { display: flex; }
+
+  #result-card {
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
+    border-radius: 16px;
+    padding: 32px;
+    width: 500px;
+    max-width: 95vw;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  #result-card h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+  }
+  #result-card h2.win  { color: #4ade80; }
+  #result-card h2.lose { color: #f87171; }
+  #result-card h2.tie  { color: #facc15; }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+  .result-row.player-row { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); }
+  .result-row.ai-row     { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); }
+
+  .result-row .who {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .result-row.player-row .who { color: #4ade80; }
+  .result-row.ai-row     .who { color: #f87171; }
+
+  .result-row .dist { font-size: 0.9rem; color: #aaa; }
+  .result-row .pts  { font-size: 1.3rem; font-weight: 700; color: #fff; }
+
+  .result-divider {
+    text-align: center;
+    color: #444;
+    font-size: 0.75rem;
+    margin: 4px 0 14px;
+  }
+
+  #result-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .btn-action {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn-action:hover { opacity: 0.85; }
+  .btn-next    { background: #6c8aff; color: #fff; }
+  .btn-restart { background: #2a2d3a; color: #aaa; }
+
+  /* ── Final screen ── */
+  #final-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: #0f1117;
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+  }
+  #final-overlay.show { display: flex; }
+  #final-overlay h1 { font-size: 2.5rem; font-weight: 800; }
+  #final-overlay h1.win  { color: #4ade80; }
+  #final-overlay h1.lose { color: #f87171; }
+  #final-overlay h1.tie  { color: #facc15; }
+  #final-overlay p { color: #888; font-size: 1rem; }
+
+  .final-scores {
+    display: flex;
+    gap: 32px;
+  }
+  .final-score-box {
+    background: #1a1d27;
+    border: 1px solid #2a2d3a;
+    border-radius: 12px;
+    padding: 24px 40px;
+    text-align: center;
+  }
+  .final-score-box .name { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+  .final-score-box .num  { font-size: 3rem; font-weight: 800; }
+  .final-score-box.player .name { color: #4ade80; }
+  .final-score-box.player .num  { color: #4ade80; }
+  .final-score-box.ai     .name { color: #f87171; }
+  .final-score-box.ai     .num  { color: #f87171; }
+
+  #btn-play-again {
+    padding: 14px 40px;
+    background: #6c8aff;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #btn-play-again:hover { background: #8aa3ff; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Geo<span>AI</span> – Mensch vs. KI</h1>
+  <div class="score-board">
+    <div class="score-item player">
+      <div class="label">Du</div>
+      <div class="value" id="hdr-player">0</div>
+    </div>
+    <div class="score-item round">
+      <div class="label">Runde</div>
+      <div class="value" id="hdr-round">1 / {{ rounds }}</div>
+    </div>
+    <div class="score-item ai">
+      <div class="label">KI</div>
+      <div class="value" id="hdr-ai">0</div>
+    </div>
+  </div>
+</header>
+
+<div id="game">
+  <!-- Bild -->
+  <div id="image-panel">
+    <div id="loading-overlay">
+      <div class="spinner"></div>
+      <p>Lade Bild…</p>
+    </div>
+    <img id="street-image" src="" alt="" style="display:none">
+  </div>
+
+  <!-- Karte -->
+  <div id="map-panel">
+    <div class="map-hint" id="map-hint">Klicke auf die Karte um zu tippen</div>
+    <div id="map"></div>
+    <div id="submit-bar">
+      <div id="guess-info">Noch keine Schätzung gesetzt</div>
+      <button id="submit-btn" disabled>Absenden</button>
+    </div>
+  </div>
+</div>
+
+<!-- Runden-Ergebnis -->
+<div id="result-overlay">
+  <div id="result-card">
+    <h2 id="result-title"></h2>
+    <div class="result-row player-row">
+      <span class="who">Du</span>
+      <span class="dist" id="r-player-dist"></span>
+      <span class="pts"  id="r-player-score"></span>
+    </div>
+    <div class="result-divider">vs</div>
+    <div class="result-row ai-row">
+      <span class="who">KI</span>
+      <span class="dist" id="r-ai-dist"></span>
+      <span class="pts"  id="r-ai-score"></span>
+    </div>
+    <div id="result-actions">
+      <button class="btn-action btn-restart" onclick="restartGame()">Neu starten</button>
+      <button class="btn-action btn-next"    id="btn-next">Nächste Runde →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Endbildschirm -->
+<div id="final-overlay">
+  <h1 id="final-title"></h1>
+  <p id="final-subtitle"></p>
+  <div class="final-scores">
+    <div class="final-score-box player">
+      <div class="name">Du</div>
+      <div class="num" id="final-player">0</div>
+    </div>
+    <div class="final-score-box ai">
+      <div class="name">KI</div>
+      <div class="num" id="final-ai">0</div>
+    </div>
+  </div>
+  <button id="btn-play-again" onclick="restartGame()">Nochmal spielen</button>
+</div>
+
+<script>
+const TOTAL_ROUNDS = {{ rounds }};
+let round = 1;
+let totalPlayer = 0, totalAI = 0;
+let playerMarker = null;
+let currentData  = null;
+let playerLat = null, playerLon = null;
+
+// ── Karte ────────────────────────────────────────────────────────────────────
+const map = L.map('map', { center: [20, 0], zoom: 2, zoomControl: true });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap, © CARTO', maxZoom: 18
+}).addTo(map);
+
+const playerIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:16px;height:16px;background:#4ade80;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(74,222,128,0.6)"></div>',
+  iconSize: [16,16], iconAnchor: [8,8]
+});
+const aiIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:16px;height:16px;background:#f87171;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(248,113,113,0.6)"></div>',
+  iconSize: [16,16], iconAnchor: [8,8]
+});
+const trueIcon = L.divIcon({
+  className: '',
+  html: '<div style="width:20px;height:20px;background:#facc15;border:2px solid #fff;border-radius:50%;box-shadow:0 0 10px rgba(250,204,21,0.8)"></div>',
+  iconSize: [20,20], iconAnchor: [10,10]
+});
+
+map.on('click', (e) => {
+  if (document.getElementById('result-overlay').classList.contains('show')) return;
+  playerLat = e.latlng.lat;
+  playerLon = e.latlng.lng;
+  if (playerMarker) map.removeLayer(playerMarker);
+  playerMarker = L.marker([playerLat, playerLon], { icon: playerIcon })
+    .addTo(map)
+    .bindTooltip('Deine Schätzung', { permanent: false });
+  document.getElementById('guess-info').textContent =
+    `${playerLat.toFixed(2)}°N  ${playerLon.toFixed(2)}°E`;
+  document.getElementById('guess-info').classList.add('active');
+  document.getElementById('submit-btn').disabled = false;
+});
+
+// ── Bild laden ───────────────────────────────────────────────────────────────
+async function loadImage() {
+  playerLat = null; playerLon = null;
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('guess-info').textContent = 'Noch keine Schätzung gesetzt';
+  document.getElementById('guess-info').classList.remove('active');
+  document.getElementById('loading-overlay').style.display = 'flex';
+  document.getElementById('street-image').style.display = 'none';
+  if (playerMarker) { map.removeLayer(playerMarker); playerMarker = null; }
+
+  const res  = await fetch('/api/image');
+  currentData = await res.json();
+
+  const img = document.getElementById('street-image');
+  img.onload = () => {
+    document.getElementById('loading-overlay').style.display = 'none';
+    img.style.display = 'block';
+  };
+  img.src = 'data:image/jpeg;base64,' + currentData.img;
+}
+
+// ── Guess absenden ────────────────────────────────────────────────────────────
+document.getElementById('submit-btn').addEventListener('click', async () => {
+  if (playerLat === null) return;
+  document.getElementById('submit-btn').disabled = true;
+
+  const res  = await fetch('/api/guess', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idx: currentData.idx, lat: playerLat, lon: playerLon })
+  });
+  const data = await res.json();
+
+  showResult(data);
+});
+
+// ── Ergebnis anzeigen ─────────────────────────────────────────────────────────
+function showResult(data) {
+  // Marker auf der Karte
+  const trueLat  = data.true_lat, trueLon  = data.true_lon;
+  const aiLat    = data.ai_lat,   aiLon    = data.ai_lon;
+
+  L.marker([trueLat, trueLon], { icon: trueIcon })
+    .addTo(map).bindTooltip('Wahrer Ort', { permanent: true, direction: 'top' });
+  L.marker([aiLat, aiLon], { icon: aiIcon })
+    .addTo(map).bindTooltip(`KI (${data.ai_conf}% Konfidenz)`, { permanent: false });
+
+  // Linien
+  L.polyline([[playerLat, playerLon], [trueLat, trueLon]],
+    { color: '#4ade80', weight: 2, dashArray: '6,4' }).addTo(map);
+  L.polyline([[aiLat, aiLon], [trueLat, trueLon]],
+    { color: '#f87171', weight: 2, dashArray: '6,4' }).addTo(map);
+
+  // Karte zentrieren
+  const bounds = L.latLngBounds(
+    [[playerLat, playerLon], [aiLat, aiLon], [trueLat, trueLon]]
+  );
+  map.fitBounds(bounds, { padding: [40, 40] });
+
+  // Scores
+  totalPlayer += data.player_score;
+  totalAI     += data.ai_score;
+  document.getElementById('hdr-player').textContent = totalPlayer.toLocaleString();
+  document.getElementById('hdr-ai').textContent     = totalAI.toLocaleString();
+
+  // Result card
+  const title = document.getElementById('result-title');
+  if (data.winner === 'player') {
+    title.textContent = '🎉 Du gewinnst diese Runde!';
+    title.className = 'win';
+  } else if (data.winner === 'ai') {
+    title.textContent = '🤖 KI gewinnt diese Runde!';
+    title.className = 'lose';
+  } else {
+    title.textContent = '🤝 Unentschieden!';
+    title.className = 'tie';
+  }
+
+  document.getElementById('r-player-dist').textContent  = `${data.player_dist.toLocaleString()} km entfernt`;
+  document.getElementById('r-player-score').textContent = `${data.player_score.toLocaleString()} Pts`;
+  document.getElementById('r-ai-dist').textContent      = `${data.ai_dist.toLocaleString()} km entfernt`;
+  document.getElementById('r-ai-score').textContent     = `${data.ai_score.toLocaleString()} Pts`;
+
+  const btnNext = document.getElementById('btn-next');
+  if (round >= TOTAL_ROUNDS) {
+    btnNext.textContent = 'Ergebnis anzeigen →';
+    btnNext.onclick = showFinal;
+  } else {
+    btnNext.textContent = 'Nächste Runde →';
+    btnNext.onclick = nextRound;
+  }
+
+  document.getElementById('result-overlay').classList.add('show');
+}
+
+// ── Nächste Runde ─────────────────────────────────────────────────────────────
+function nextRound() {
+  round++;
+  document.getElementById('hdr-round').textContent = `${round} / ${TOTAL_ROUNDS}`;
+  document.getElementById('result-overlay').classList.remove('show');
+  map.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) map.removeLayer(l); });
+  map.setView([20, 0], 2);
+  loadImage();
+}
+
+// ── Endbildschirm ─────────────────────────────────────────────────────────────
+function showFinal() {
+  document.getElementById('result-overlay').classList.remove('show');
+  document.getElementById('final-player').textContent = totalPlayer.toLocaleString();
+  document.getElementById('final-ai').textContent     = totalAI.toLocaleString();
+
+  const title    = document.getElementById('final-title');
+  const subtitle = document.getElementById('final-subtitle');
+  if (totalPlayer > totalAI) {
+    title.textContent    = '🏆 Du hast gewonnen!';
+    title.className      = 'win';
+    subtitle.textContent = `Du hast die KI mit ${(totalPlayer - totalAI).toLocaleString()} Punkten geschlagen.`;
+  } else if (totalAI > totalPlayer) {
+    title.textContent    = '🤖 KI hat gewonnen!';
+    title.className      = 'lose';
+    subtitle.textContent = `Die KI war um ${(totalAI - totalPlayer).toLocaleString()} Punkte besser.`;
+  } else {
+    title.textContent    = '🤝 Unentschieden!';
+    title.className      = 'tie';
+    subtitle.textContent = 'Gleichstand nach allen Runden.';
+  }
+
+  document.getElementById('final-overlay').classList.add('show');
+}
+
+// ── Neu starten ───────────────────────────────────────────────────────────────
+function restartGame() {
+  round = 1; totalPlayer = 0; totalAI = 0;
+  document.getElementById('hdr-player').textContent = '0';
+  document.getElementById('hdr-ai').textContent     = '0';
+  document.getElementById('hdr-round').textContent  = `1 / ${TOTAL_ROUNDS}`;
+  document.getElementById('result-overlay').classList.remove('show');
+  document.getElementById('final-overlay').classList.remove('show');
+  map.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.Polyline) map.removeLayer(l); });
+  map.setView([20, 0], 2);
+  loadImage();
+}
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+loadImage();
+</script>
+</body>
+</html>
