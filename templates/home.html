@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoAI – Mensch vs. KI</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/home.css">
+</head>
+<body>
+<div id="bg"></div>
+
+<div id="wrap">
+  <!-- Brand -->
+  <div id="brand">
+    <div id="logo">Geo<em>AI</em></div>
+    <p id="tagline">RATE DEN ORT · SCHLAGE DIE KI</p>
+  </div>
+
+  <!-- Mode selection -->
+  <div id="modes">
+    <div class="mode-card active" id="mc-sp" onclick="selectMode('sp')">
+      <div class="mc-icon">🎮</div>
+      <div class="mc-title">Singleplayer</div>
+      <div class="mc-desc">Gegen die KI antreten</div>
+    </div>
+    <div class="mode-card" id="mc-mp" onclick="selectMode('mp')">
+      <div class="mc-icon">👥</div>
+      <div class="mc-title">Multiplayer</div>
+      <div class="mc-desc">Mit Freunden spielen</div>
+    </div>
+  </div>
+
+  <!-- Settings card -->
+  <div id="settings-card">
+
+    <!-- Name -->
+    <div class="set-group">
+      <div class="set-label">Name</div>
+      <input id="player-name" type="text" placeholder="Dein Name" maxlength="20" autocomplete="off">
+    </div>
+
+    <!-- Difficulty -->
+    <div class="set-group">
+      <div class="set-label">Schwierigkeit</div>
+      <div id="diff-btns">
+        <button class="diff-btn easy"   data-d="easy"   onclick="setDiff(this)">Einfach</button>
+        <button class="diff-btn normal active" data-d="normal" onclick="setDiff(this)">Normal</button>
+        <button class="diff-btn hard"   data-d="hard"   onclick="setDiff(this)">Schwer</button>
+      </div>
+      <div class="diff-info">
+        <span>Großzügiges<br>Scoring</span>
+        <span>Standard</span>
+        <span>Striktes<br>Scoring</span>
+      </div>
+    </div>
+
+    <!-- Rounds -->
+    <div class="set-group">
+      <div class="set-label">Runden <span id="rounds-val">5</span></div>
+      <input type="range" id="rounds-inp" min="3" max="15" value="5"
+             oninput="document.getElementById('rounds-val').textContent=this.value">
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Singleplayer start -->
+    <div id="sp-section">
+      <button class="start-btn green" onclick="startSingleplayer()">Spiel starten →</button>
+    </div>
+
+    <!-- Multiplayer section -->
+    <div id="mp-section" style="display:none">
+
+      <!-- Two-column: Host | Join -->
+      <div id="mp-cols" id="mp-create-join">
+        <div class="mp-col-card" id="mp-host-card">
+          <div class="mcc-icon">🏠</div>
+          <div class="mcc-title">Raum erstellen</div>
+          <div class="mcc-desc">Erstelle einen neuen Raum und lade Freunde ein</div>
+          <button class="start-btn" onclick="hostRoom()" id="host-btn">Erstellen →</button>
+        </div>
+        <div class="mp-col-card" id="mp-join-card">
+          <div class="mcc-icon">🔗</div>
+          <div class="mcc-title">Beitreten</div>
+          <div class="mcc-desc">Gib den Code eines bestehenden Raums ein</div>
+          <input id="join-code" type="text" placeholder="AB3K9" maxlength="5" autocomplete="off"
+                 onkeydown="if(event.key==='Enter')joinRoom()">
+          <button class="start-btn acc" onclick="joinRoom()">Beitreten →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="error-msg"></div>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+<script>
+let socket = null;
+let mode   = 'sp';
+let diff   = 'normal';
+
+function selectMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('mc-' + m).classList.add('active');
+  document.getElementById('sp-section').style.display = m === 'sp' ? 'block' : 'none';
+  document.getElementById('mp-section').style.display = m === 'mp' ? 'block' : 'none';
+}
+
+function setDiff(btn) {
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  diff = btn.dataset.d;
+}
+
+function getName()   { return document.getElementById('player-name').value.trim() || 'Spieler'; }
+function getRounds() { return parseInt(document.getElementById('rounds-inp').value); }
+function showError(msg) { document.getElementById('error-msg').textContent = msg; }
+
+function startSingleplayer() {
+  window.location.href = `/game?rounds=${getRounds()}&difficulty=${diff}`;
+}
+
+// Show error if redirected back from a missing room
+(function() {
+  const p = new URLSearchParams(window.location.search);
+  if (p.get('error') === 'room_not_found') {
+    showError('Raum „' + p.get('code') + '" nicht gefunden oder abgelaufen.');
+    // Switch to MP / join tab automatically
+    selectMode('mp');
+  }
+})();
+
+// ── Multiplayer: host creates room via server, non-host just redirects ────────
+function hostRoom() {
+  showError('');
+  const btn = document.getElementById('host-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Erstelle…'; }
+  if (!socket) {
+    socket = io();
+    socket.on('room_created', onRoomCreated);
+    socket.on('join_error',   d => {
+      showError(d.msg);
+      if (btn) { btn.disabled = false; btn.textContent = 'Erstellen →'; }
+    });
+  }
+  socket.emit('create_room', { name: getName(), rounds: getRounds(), difficulty: diff });
+}
+
+function onRoomCreated(data) {
+  // Save host credentials, then go straight to the game lobby
+  const name = getName();
+  sessionStorage.setItem('geoai_name',       name);
+  sessionStorage.setItem('geoai_host',       '1');
+  sessionStorage.setItem('geoai_host_token', data.host_token || '');
+  window.location.href = `/room/${data.code}?name=${encodeURIComponent(name)}`;
+}
+
+function joinRoom() {
+  const inp  = document.getElementById('join-code');
+  const code = inp ? inp.value.trim().toUpperCase() : '';
+  if (!code) { showError('Bitte Code eingeben.'); return; }
+  showError('');
+  const name = getName();
+  sessionStorage.setItem('geoai_name', name);
+  window.location.href = '/room/' + code + '?name=' + encodeURIComponent(name);
+}
+</script>
+</body>
+</html>

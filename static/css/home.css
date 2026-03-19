@@ -1,0 +1,188 @@
+:root {
+  --bg:    #07090f;
+  --s1:    #0d1018;
+  --s2:    #131720;
+  --s3:    #1a2030;
+  --bd:    #1e2535;
+  --bd2:   #273045;
+  --text:  #bcc8e0;
+  --muted: #485570;
+  --green: #00e896;
+  --red:   #ff3d5a;
+  --yel:   #ffcc00;
+  --acc:   #5b7fff;
+  --mono:  'IBM Plex Mono', monospace;
+  --head:  'Syne', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; overflow:hidden; }
+body { font-family:var(--mono); background:var(--bg); color:var(--text); }
+
+/* ── Animated background ── */
+#bg {
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(91,127,255,.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(0,232,150,.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(255,61,90,.04) 0%, transparent 50%);
+  animation:bgPulse 8s ease-in-out infinite alternate;
+}
+@keyframes bgPulse {
+  from { opacity:.6; }
+  to   { opacity:1; }
+}
+/* Grid overlay */
+#bg::after {
+  content:''; position:absolute; inset:0;
+  background-image:
+    linear-gradient(var(--bd) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bd) 1px, transparent 1px);
+  background-size:60px 60px;
+  opacity:.25;
+}
+
+/* ── Layout ── */
+#wrap {
+  position:relative; z-index:1;
+  height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:32px;
+  padding:24px;
+}
+
+/* ── Brand ── */
+#brand { text-align:center; }
+#logo {
+  font-family:var(--head); font-size:3.2rem; font-weight:800;
+  letter-spacing:2px; color:#fff; line-height:1;
+}
+#logo em { color:var(--acc); font-style:normal; }
+#tagline { color:var(--muted); font-size:.72rem; letter-spacing:2px; margin-top:8px; }
+
+/* ── Mode cards ── */
+#modes { display:flex; gap:14px; }
+.mode-card {
+  width:160px; padding:24px 16px; text-align:center;
+  background:var(--s1); border:1px solid var(--bd); border-radius:14px;
+  cursor:pointer; transition:all .2s; user-select:none;
+}
+.mode-card:hover { border-color:var(--acc); background:var(--s2); transform:translateY(-2px); }
+.mode-card.active { border-color:var(--acc); background:rgba(91,127,255,.08); box-shadow:0 0 20px rgba(91,127,255,.15); }
+.mc-icon { font-size:2rem; margin-bottom:10px; }
+.mc-title { font-family:var(--head); font-size:.88rem; font-weight:700; color:#fff; margin-bottom:4px; }
+.mc-desc  { font-size:.62rem; color:var(--muted); }
+
+/* ── Settings card ── */
+#settings-card {
+  width:100%; max-width:520px;
+  background:var(--s1); border:1px solid var(--bd); border-radius:14px;
+  padding:24px; display:flex; flex-direction:column; gap:18px;
+}
+.set-group { display:flex; flex-direction:column; gap:8px; }
+.set-label {
+  font-size:.58rem; text-transform:uppercase; letter-spacing:1.5px;
+  color:var(--muted);
+}
+.set-label span { color:var(--acc); float:right; }
+
+/* Name input */
+#player-name {
+  width:100%; padding:9px 13px; background:var(--s2); border:1px solid var(--bd2);
+  border-radius:8px; color:#fff; font-family:var(--mono); font-size:.8rem;
+  outline:none; transition:border-color .15s;
+}
+#player-name:focus { border-color:var(--acc); }
+#player-name::placeholder { color:var(--muted); }
+
+/* Difficulty */
+#diff-btns { display:flex; gap:8px; }
+.diff-btn {
+  flex:1; padding:8px; border-radius:7px; border:1px solid var(--bd2);
+  background:var(--s2); color:var(--muted); font-family:var(--mono);
+  font-size:.68rem; cursor:pointer; transition:all .15s; letter-spacing:.3px;
+}
+.diff-btn:hover { border-color:var(--acc); color:var(--text); }
+.diff-btn.active { background:rgba(91,127,255,.15); border-color:var(--acc); color:#fff; }
+.diff-btn.active.easy { background:rgba(0,232,150,.12); border-color:var(--green); color:var(--green); }
+.diff-btn.active.hard { background:rgba(255,61,90,.12);  border-color:var(--red);   color:var(--red); }
+
+/* Rounds slider */
+#rounds-inp { width:100%; accent-color:var(--acc); cursor:pointer; }
+
+/* Divider */
+.divider { height:1px; background:var(--bd); margin:0 -24px; }
+
+/* Multiplayer two-column layout */
+#mp-cols {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+}
+.mp-col-card {
+  display:flex; flex-direction:column; gap:10px; padding:18px;
+  background:var(--s2); border:1px solid var(--bd2); border-radius:12px;
+  transition:border-color .2s;
+}
+.mp-col-card:hover { border-color:var(--acc); }
+.mcc-icon  { font-size:1.6rem; }
+.mcc-title { font-family:var(--head); font-size:.85rem; font-weight:700; color:#fff; }
+.mcc-desc  { font-size:.62rem; color:var(--muted); line-height:1.5; flex:1; }
+
+.start-btn.acc { background:var(--acc); }
+.start-btn.acc:hover { background:#7b9fff; }
+
+#join-code {
+  width:100%; padding:9px 13px; background:var(--s1); border:1px solid var(--bd2);
+  border-radius:8px; color:#fff; font-family:var(--mono); font-size:.85rem;
+  text-align:center; text-transform:uppercase; letter-spacing:3px;
+  outline:none; transition:border-color .15s;
+}
+#join-code:focus { border-color:var(--acc); }
+#join-code::placeholder { color:var(--muted); letter-spacing:1px; text-transform:none; }
+
+/* Lobby */
+#mp-lobby { display:flex; flex-direction:column; gap:12px; }
+#lobby-code-box {
+  text-align:center; padding:14px; background:var(--s2);
+  border:1px solid var(--bd2); border-radius:10px;
+}
+#lobby-code-box .lc-label { font-size:.58rem; color:var(--muted); letter-spacing:1.5px; margin-bottom:6px; }
+#lobby-code-box .lc-code  {
+  font-size:2rem; font-weight:700; letter-spacing:8px; color:#fff;
+  font-family:var(--head);
+}
+#lobby-code-box .lc-hint  { font-size:.6rem; color:var(--muted); margin-top:4px; }
+.copy-btn {
+  margin-top:8px; padding:4px 12px; border:1px solid var(--bd2); border-radius:5px;
+  background:var(--s3); color:var(--muted); font-family:var(--mono); font-size:.6rem;
+  cursor:pointer; transition:all .15s;
+}
+.copy-btn:hover { border-color:var(--acc); color:#fff; }
+
+#lobby-players-list { display:flex; flex-wrap:wrap; gap:7px; }
+.lobby-player-chip {
+  padding:4px 12px; border-radius:20px; font-size:.68rem; font-weight:600;
+  border:1px solid; background:rgba(0,0,0,.3);
+}
+#lobby-status { font-size:.65rem; color:var(--muted); text-align:center; }
+
+/* Start / action buttons */
+.start-btn {
+  width:100%; padding:12px; border:none; border-radius:9px;
+  background:var(--acc); color:#fff; font-family:var(--mono);
+  font-size:.8rem; font-weight:700; letter-spacing:.5px;
+  cursor:pointer; transition:all .2s;
+}
+.start-btn:hover { background:#7b9fff; transform:translateY(-1px); }
+.start-btn:disabled { opacity:.3; cursor:not-allowed; transform:none; }
+.start-btn.green { background:var(--green); color:#000; }
+.start-btn.green:hover { background:#33ffa8; }
+
+/* Error */
+#error-msg {
+  font-size:.68rem; color:var(--red); text-align:center;
+  min-height:18px;
+}
+
+/* Difficulty badges (info below difficulty) */
+.diff-info {
+  display:flex; gap:8px; font-size:.6rem; color:var(--muted);
+}
+.diff-info span { flex:1; text-align:center; line-height:1.5; }

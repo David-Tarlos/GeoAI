@@ -1,6 +1,8 @@
 // ── GAME MAP INIT ─────────────────────────────────────────────────────────────
 gameMap = L.map('game-map', { center: [20, 0], zoom: 2, zoomControl: true });
 L.tileLayer(TILE, TILE_OPT).addTo(gameMap);
+// Force Leaflet to recalculate container size after render
+setTimeout(() => gameMap.invalidateSize(), 100);
 
 gameMap.on('click', e => {
   if (document.getElementById('result-panel').classList.contains('show')) return;
@@ -84,7 +86,7 @@ function toggleView() {
 function togglePip() {
   pipExpanded = !pipExpanded;
   document.getElementById('g-pip').classList.toggle('expanded', pipExpanded);
-  if (!globeMode) gameMap.invalidateSize();
+  setTimeout(() => { if (!globeMode) gameMap.invalidateSize(); }, 350);
 }
 
 // ── GAME LOGIC ────────────────────────────────────────────────────────────────
@@ -111,11 +113,13 @@ async function loadGameImage() {
 
 document.getElementById('submit-btn').addEventListener('click', async () => {
   if (!pLat) return;
+  // Multiplayer: delegate to multiplayer.js
+  if (IS_MULTIPLAYER) { mpSubmitGuess(); return; }
   document.getElementById('submit-btn').disabled = true;
   const res = await fetch('/api/guess', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idx: currentData.idx, lat: pLat, lon: pLon })
+    body: JSON.stringify({ idx: currentData.idx, lat: pLat, lon: pLon, difficulty: DIFFICULTY })
   });
   showResult(await res.json());
 });

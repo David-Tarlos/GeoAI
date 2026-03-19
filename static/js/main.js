@@ -27,7 +27,7 @@ function switchTab(name) {
   if (name === 'dataset' && !dsMap)  initDsMap();
   if (name === 'sim'     && !simMap) initSimMap();
   if (name === 'upload'  && !upMap)  initUpMap();
-  if (name === 'stats')              renderStats();
+  if (name === 'stats') setTimeout(() => renderStats(), 30);
   setTimeout(() => {
     if (name === 'dataset' && dsMap)  dsMap.invalidateSize();
     if (name === 'sim'     && simMap) simMap.invalidateSize();

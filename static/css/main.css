@@ -29,6 +29,7 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
   border-right:1px solid var(--bd); white-space:nowrap; letter-spacing:.5px; user-select:none;
 }
 .logo em { color:var(--acc); font-style:normal; }
+a.logo { text-decoration:none; }
 .tabs { display:flex; align-items:stretch; }
 .tab {
   padding:0 16px; display:flex; align-items:center; gap:6px;
@@ -50,14 +51,15 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
 .rnd-badge span { color:var(--yel); }
 
 /* ── PANELS ── */
-#panels { flex:1; position:relative; overflow:hidden; }
-.panel { position:absolute; inset:0; display:none; }
+#panels { flex:1; position:relative; overflow:hidden; min-height:0; }
+.panel { position:absolute; inset:0; display:none; overflow:hidden; }
 .panel.active { display:flex; }
 
 /* ═══════════════════════════
    GAME TAB
    ═══════════════════════════ */
-#panel-game { position:relative; }
+/* #panel-game inherits position:absolute; inset:0 from .panel
+   — that already makes it a positioning context for children */
 
 /* Fullscreen map + globe */
 #game-map, #globe-container {
@@ -73,9 +75,15 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
   position:absolute; z-index:100; top:12px; left:12px;
   width:340px; height:215px; border-radius:10px; overflow:hidden;
   border:1px solid var(--bd2); box-shadow:0 8px 30px rgba(0,0,0,.7);
-  background:#000; transition:width .3s, height .3s;
+  background:#000;
+  transition:width .3s ease, height .3s ease;
+  resize:both; /* native browser resize handle */
+  min-width:200px; min-height:130px; max-width:80vw; max-height:80vh;
 }
-#g-pip.expanded { width:55vw; height:calc(100% - 24px); }
+#g-pip.expanded {
+  width:52vw; height:calc(100% - 24px);
+  resize:none;
+}
 #g-pip-load {
   position:absolute; inset:0; background:var(--s1);
   display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px;

@@ -3,21 +3,18 @@ Startet GeoAI öffentlich über ngrok.
 Alle mit dem Link können mitspielen solange dieser PC läuft.
 
 Voraussetzung:
-  pip install pyngrok flask
-
-Kostenloses ngrok-Konto: https://ngrok.com  (kostenlos, kein Token nötig für kurze Sessions)
+  pip install pyngrok flask flask-socketio
 """
 from pyngrok import ngrok
-import threading, app as flask_app
+import threading
+import app as flask_app
 
-# Flask in eigenem Thread starten
-def run_flask():
-    flask_app.app.run(port=5000, use_reloader=False)
+def run():
+    flask_app.socketio.run(flask_app.app, port=5000, use_reloader=False, allow_unsafe_werkzeug=True)
 
-t = threading.Thread(target=run_flask, daemon=True)
+t = threading.Thread(target=run, daemon=True)
 t.start()
 
-# Öffentliche URL erstellen
 public_url = ngrok.connect(5000)
 print()
 print('━' * 50)

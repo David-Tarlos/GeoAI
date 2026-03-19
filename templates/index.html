@@ -12,7 +12,7 @@
 
 <!-- ──── TOPBAR ──── -->
 <div id="topbar">
-  <div class="logo">Geo<em>AI</em></div>
+  <a class="logo" href="/" title="Zurück zur Startseite">Geo<em>AI</em></a>
   <div class="tabs">
     <div class="tab active" data-tab="game"    onclick="switchTab('game')">    <span class="ti">🎮</span> SPIEL</div>
     <div class="tab"        data-tab="dataset" onclick="switchTab('dataset')"> <span class="ti">🗺</span> DATASET</div>
@@ -20,6 +20,8 @@
     <div class="tab"        data-tab="sim"     onclick="switchTab('sim')">     <span class="ti">🤖</span> SIMULATION</div>
     <div class="tab"        data-tab="upload"  onclick="switchTab('upload')">  <span class="ti">📤</span> UPLOAD</div>
   </div>
+  <!-- MP player list (only shown in multiplayer) -->
+  <div id="mp-players-strip" style="display:none"></div>
   <div class="score-strip">
     <span class="sc-l">DU</span><span class="sc-v p" id="hdr-p">0</span>
     <span class="sc-div">|</span>
@@ -51,6 +53,11 @@
         <button class="pip-btn" onclick="togglePip()" title="Größe ändern">⤢</button>
       </div>
       <span id="pip-mode-badge">SIM</span>
+    </div>
+
+    <!-- Timer (multiplayer only) -->
+    <div id="mp-timer-wrap" style="display:none">
+      <span id="mp-timer">20s</span>
     </div>
 
     <!-- Submit bar bottom-center -->
@@ -221,15 +228,24 @@
 </div>
 
 <!-- ──── SCRIPTS ──── -->
-<!-- Template variable for Flask -->
-<script>const TOTAL_ROUNDS = {{ rounds }};</script>
-<!-- External libraries -->
+<script>
+  const TOTAL_ROUNDS  = {{ rounds }};
+  const DIFFICULTY    = "{{ difficulty }}";
+  const ROOM_CODE     = "{{ room_code }}";
+  const PLAYER_NAME   = "{{ player_name }}";
+  const IS_MULTIPLAYER = ROOM_CODE !== '';
+</script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/globe.gl"></script>
-<!-- App scripts (load order matters: main → game → extras) -->
+{% if room_code %}
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+{% endif %}
 <script src="/static/js/main.js"></script>
 <script src="/static/js/game.js"></script>
 <script src="/static/js/extras.js"></script>
+{% if room_code %}
+<script src="/static/js/multiplayer.js"></script>
+{% endif %}
 
 </body>
 </html>
