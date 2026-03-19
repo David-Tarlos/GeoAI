@@ -324,13 +324,7 @@ def on_join(data):
     emit('lobby_update', {'players': list(r['players'].values())},
          to=code, skip_sid=request.sid)
 
-@socketio.on('start_game')
-def on_start(data):
-    code = data['code']
-    if code not in _rooms or _rooms[code]['host'] != request.sid:
-        return
-    _rooms[code]['round'] = 0
-    _next_round(code)
+
 
 def _next_round(code):
     r = _rooms[code]
@@ -463,3 +457,53 @@ def on_disconnect():
 if __name__ == '__main__':
     print('Starting GeoAI on http://localhost:5000')
     socketio.run(app, debug=False, port=5000, allow_unsafe_werkzeug=True)
+# ── PATCH: replace these two functions in app.py ─────────────────────────────
+#
+# 1. Change the ROUND_TIMEOUT constant to a default only:
+ROUND_TIMEOUT_DEFAULT = 20   # fallback if host doesn't send one
+
+# 2. Replace on_start:
+@socketio.on('start_game')
+def on_start(data):
+    code = data['code']
+    if code not in _rooms or _rooms[code]['host'] != request.sid:
+        return
+    # Store the host-chosen timeout on the room so _next_round can use it
+    _rooms[code]['timeout'] = max(5, min(60, int(data.get('timeout', ROUND_TIMEOUT_DEFAULT))))
+    _rooms[code]['round'] = 0
+    _next_round(code)
+
+# 3. Replace _next_round — reads room['timeout'] instead of the global constant:
+def _next_round(code):
+    r = _rooms[code]
+    r['round']  += 1
+    r['guesses'] = {}
+    r['state']   = 'playing'
+    r['image']   = _sample_image()
+    round_num    = r['round']
+    timeout      = r.get('timeout', ROUND_TIMEOUT_DEFAULT)
+    socketio.emit('round_start', {
+        'round': round_num, 'rounds': r['rounds'],
+        'img': r['image']['img'], 'idx': r['image']['idx'],
+        'players': list(r['players'].values()),
+        'timeout': timeout,
+    }, to=code)
+
+    def _auto_reveal():
+        room = _rooms.get(code)
+        if not room or room['round'] != round_num or room['state'] != 'playing':
+            return
+        for sid, p in room['players'].items():
+            if sid not in room['guesses']:
+                room['guesses'][sid] = {
+                    'name': p['name'], 'color': p['color'],
+                    'lat': 0, 'lon': 0, 'dist': 20000, 'score': 0,
+                }
+        _reveal_round(code)
+
+    t = threading.Timer(timeout, _auto_reveal)
+    t.daemon = True
+    if r.get('_timer'):
+        r['_timer'].cancel()
+    r['_timer'] = t
+    t.start()
