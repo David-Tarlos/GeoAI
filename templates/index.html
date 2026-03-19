@@ -5,334 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GeoAI – Mensch vs. KI</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:    #07090f;
-  --s1:    #0d1018;
-  --s2:    #131720;
-  --s3:    #1a2030;
-  --bd:    #1e2535;
-  --bd2:   #273045;
-  --text:  #bcc8e0;
-  --muted: #485570;
-  --green: #00e896;
-  --red:   #ff3d5a;
-  --yel:   #ffcc00;
-  --acc:   #5b7fff;
-  --mono:  'IBM Plex Mono', monospace;
-  --head:  'Syne', sans-serif;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-html,body { height:100%; overflow:hidden; }
-body { font-family:var(--mono); background:var(--bg); color:var(--text); display:flex; flex-direction:column; height:100vh; }
-
-/* ──── TOPBAR ──── */
-#topbar {
-  height:50px; background:var(--s1); border-bottom:1px solid var(--bd);
-  display:flex; align-items:stretch; flex-shrink:0; z-index:500;
-}
-.logo {
-  display:flex; align-items:center; padding:0 18px;
-  font-family:var(--head); font-size:1rem; font-weight:800; color:#fff;
-  border-right:1px solid var(--bd); white-space:nowrap; letter-spacing:.5px;
-}
-.logo em { color:var(--acc); font-style:normal; }
-
-.tabs { display:flex; align-items:stretch; }
-.tab {
-  padding:0 18px; display:flex; align-items:center; gap:6px;
-  font-size:.68rem; letter-spacing:.5px; color:var(--muted);
-  cursor:pointer; border-right:1px solid var(--bd); border-bottom:3px solid transparent;
-  transition:all .15s; user-select:none; white-space:nowrap;
-}
-.tab .ti { font-size:.8rem; }
-.tab:hover { color:var(--text); background:var(--s2); }
-.tab.active { color:#fff; border-bottom-color:var(--acc); background:var(--s2); }
-
-.score-strip {
-  display:flex; align-items:center; gap:5px; padding:0 14px;
-  margin-left:auto; border-left:1px solid var(--bd); font-size:.68rem;
-}
-.sc-l { color:var(--muted); }
-.sc-v { font-weight:700; min-width:46px; text-align:right; }
-.sc-v.p { color:var(--green); }
-.sc-v.a { color:var(--red); }
-.sc-div { color:var(--bd2); margin:0 2px; }
-.rnd-badge {
-  font-size:.62rem; color:var(--muted); padding-left:10px;
-  border-left:1px solid var(--bd); margin-left:6px;
-}
-.rnd-badge span { color:var(--yel); }
-
-/* ──── PANELS ──── */
-#panels { flex:1; position:relative; overflow:hidden; }
-.panel { position:absolute; inset:0; display:none; }
-.panel.active { display:flex; }
-
-/* ════ TAB 1: GAME ════ */
-#panel-game { flex-direction:row; }
-#g-img-col {
-  width:44%; flex-shrink:0; display:flex; flex-direction:column;
-  border-right:1px solid var(--bd); background:#000; position:relative;
-}
-#street-image-wrap { flex:1; position:relative; overflow:hidden; }
-#street-image { width:100%; height:100%; object-fit:cover; display:block; }
-#g-load {
-  position:absolute; inset:0; background:var(--s1);
-  display:flex; align-items:center; justify-content:center;
-  flex-direction:column; gap:10px;
-}
-.spin { width:26px; height:26px; border:2px solid var(--bd2); border-top-color:var(--acc); border-radius:50%; animation:spin .7s linear infinite; }
-@keyframes spin { to { transform:rotate(360deg); } }
-#g-load p { color:var(--muted); font-size:.68rem; }
-
-#g-map-col { flex:1; display:flex; flex-direction:column; position:relative; }
-#game-map  { flex:1; cursor:crosshair; }
-
-#submit-bar {
-  height:46px; background:var(--s1); border-top:1px solid var(--bd);
-  display:flex; align-items:center; gap:10px; padding:0 14px; flex-shrink:0;
-}
-#guess-info { flex:1; font-size:.68rem; color:var(--muted); }
-#guess-info.on { color:var(--green); }
-#submit-btn {
-  padding:7px 22px; background:var(--acc); color:#fff; border:none;
-  border-radius:6px; font-size:.75rem; font-weight:700; font-family:var(--mono);
-  cursor:pointer; letter-spacing:.5px; transition:all .15s;
-}
-#submit-btn:disabled { opacity:.2; cursor:not-allowed; }
-#submit-btn:not(:disabled):hover { background:#7b9fff; }
-
-/* Result slide-in */
-#result-panel {
-  position:absolute; bottom:46px; right:-310px; width:290px;
-  background:rgba(13,16,24,.97); border:1px solid var(--bd2);
-  border-radius:10px 0 0 10px; padding:16px; z-index:300;
-  transition:right .35s cubic-bezier(.34,1.3,.64,1); backdrop-filter:blur(16px);
-}
-#result-panel.show { right:0; }
-.rp-title {
-  font-family:var(--head); font-size:.82rem; font-weight:700;
-  text-align:center; margin-bottom:12px; letter-spacing:1px;
-}
-.rp-title.win { color:var(--green); } .rp-title.lose { color:var(--red); } .rp-title.tie { color:var(--yel); }
-.rp-row {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:8px 10px; border-radius:6px; margin-bottom:7px; font-size:.7rem;
-}
-.rp-row.p { background:rgba(0,232,150,.06); border:1px solid rgba(0,232,150,.15); }
-.rp-row.a { background:rgba(255,61,90,.06); border:1px solid rgba(255,61,90,.15); }
-.rp-who { font-weight:700; font-size:.6rem; letter-spacing:1px; }
-.rp-row.p .rp-who { color:var(--green); } .rp-row.a .rp-who { color:var(--red); }
-.rp-dist { color:var(--muted); } .rp-pts { font-weight:700; color:#fff; }
-.rp-btns { display:flex; gap:7px; margin-top:10px; }
-.rp-btn {
-  flex:1; padding:8px; border-radius:6px; border:none;
-  font-size:.7rem; font-weight:700; cursor:pointer; font-family:var(--mono);
-  letter-spacing:.5px; transition:all .15s;
-}
-.rp-btn:hover { transform:scale(1.02); }
-.rp-btn.next    { background:var(--acc); color:#fff; }
-.rp-btn.restart { background:var(--s3); color:var(--muted); border:1px solid var(--bd2); }
-
-/* ════ TAB 2: DATASET ════ */
-#panel-dataset { flex-direction:row; }
-#ds-map-col { flex:1; position:relative; }
-#dataset-map { width:100%; height:100%; }
-#ds-sidebar {
-  width:290px; flex-shrink:0; border-left:1px solid var(--bd);
-  display:flex; flex-direction:column; background:var(--s1);
-}
-.ds-head {
-  padding:14px 15px 10px; border-bottom:1px solid var(--bd);
-  font-size:.62rem; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase;
-}
-.ds-head strong {
-  display:block; font-size:.82rem; color:var(--text);
-  font-family:var(--head); font-weight:700; margin-bottom:2px; letter-spacing:0; text-transform:none;
-}
-#ds-content {
-  flex:1; overflow-y:auto; display:flex; flex-direction:column;
-  align-items:center; padding:20px; gap:12px;
-}
-.ds-empty { text-align:center; color:var(--muted); font-size:.7rem; line-height:1.6; }
-.ds-empty .big { font-size:2rem; margin-bottom:8px; }
-#ds-img-wrap {
-  width:100%; aspect-ratio:4/3; border-radius:8px; overflow:hidden;
-  border:1px solid var(--bd2); background:var(--s2); display:none;
-}
-#ds-img { width:100%; height:100%; object-fit:cover; display:block; }
-#ds-info { width:100%; font-size:.67rem; display:none; }
-.ds-row {
-  display:flex; justify-content:space-between; padding:5px 0;
-  border-bottom:1px solid var(--bd);
-}
-.ds-row:last-child { border-bottom:none; }
-.ds-row .k { color:var(--muted); } .ds-row .v { color:var(--text); }
-#ds-load-spin {
-  display:none; text-align:center; color:var(--muted); font-size:.68rem; padding:16px;
-}
-
-/* ════ TAB 3: STATS ════ */
-#panel-stats {
-  flex-direction:column; padding:28px 32px; overflow-y:auto;
-  gap:22px; scrollbar-width:thin; scrollbar-color:var(--bd2) transparent;
-}
-.stats-h { font-family:var(--head); font-size:1.15rem; font-weight:800; color:#fff; }
-.stats-h span { color:var(--muted); font-size:.72rem; font-family:var(--mono); font-weight:400; margin-left:10px; }
-
-.stat-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-.stat-card {
-  background:var(--s1); border:1px solid var(--bd); border-radius:10px; padding:16px 18px;
-}
-.stat-card .sct { font-size:.58rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:8px; }
-.stat-card .scn { font-size:1.55rem; font-weight:700; }
-.stat-card.p .scn { color:var(--green); } .stat-card.a .scn { color:var(--red); } .stat-card.n .scn { color:var(--yel); }
-
-.chart-box {
-  background:var(--s1); border:1px solid var(--bd); border-radius:10px; padding:20px 22px;
-}
-.chart-head {
-  font-size:.6rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted);
-  margin-bottom:14px; display:flex; align-items:center; gap:16px;
-}
-.legend { display:flex; gap:12px; }
-.leg { display:flex; align-items:center; gap:5px; font-size:.6rem; }
-.leg-dot { width:8px; height:8px; border-radius:50%; }
-#chart-wrap {
-  width:100%; height:260px; position:relative;
-}
-.no-data {
-  position:absolute; inset:0; display:flex;
-  align-items:center; justify-content:center; color:var(--muted); font-size:.75rem;
-}
-
-/* ════ TAB 4: SIMULATION ════ */
-#panel-sim { flex-direction:row; }
-#sim-map-col { flex:1; position:relative; }
-#sim-map { width:100%; height:100%; }
-#sim-sidebar {
-  width:300px; flex-shrink:0; border-left:1px solid var(--bd);
-  display:flex; flex-direction:column; background:var(--s1);
-}
-.sim-sec { padding:14px 16px; border-bottom:1px solid var(--bd); }
-.sim-sec h4 { font-size:.58rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:11px; }
-.set-row { margin-bottom:11px; }
-.set-row label { display:flex; justify-content:space-between; font-size:.67rem; color:var(--text); margin-bottom:5px; }
-.set-row label .sv { color:var(--acc); }
-.set-row input[type=range] { width:100%; accent-color:var(--acc); cursor:pointer; }
-.sim-btn-run {
-  width:100%; padding:9px; border:none; border-radius:7px;
-  font-size:.78rem; font-weight:700; font-family:var(--mono);
-  cursor:pointer; letter-spacing:.5px; transition:all .15s;
-}
-.sim-btn-run.start { background:var(--green); color:#000; }
-.sim-btn-run.stop  { background:var(--red); color:#fff; }
-.sim-btn-run:hover { filter:brightness(1.1); transform:scale(1.02); }
-.prog-wrap { margin-top:10px; }
-.prog-lbl { display:flex; justify-content:space-between; font-size:.6rem; color:var(--muted); margin-bottom:4px; }
-.prog-bg { height:3px; background:var(--s3); border-radius:2px; overflow:hidden; }
-.prog-bar { height:100%; background:var(--red); border-radius:2px; width:0%; transition:width .05s linear; }
-.sim-stats-row {
-  display:flex; justify-content:space-between; padding:5px 0;
-  border-bottom:1px solid var(--bd); font-size:.67rem;
-}
-.sim-stats-row:last-child { border-bottom:none; }
-.sim-stats-row .k { color:var(--muted); }
-.sim-stats-row .v { font-weight:700; }
-.v.g { color:var(--green); } .v.r { color:var(--red); } .v.y { color:var(--yel); }
-#sim-log { flex:1; overflow-y:auto; padding:10px 12px; scrollbar-width:thin; scrollbar-color:var(--bd2) transparent; }
-.sim-le {
-  font-size:.6rem; padding:4px 7px; border-radius:4px; margin-bottom:3px;
-  display:flex; justify-content:space-between;
-  animation:fds .2s ease;
-}
-@keyframes fds { from { opacity:0; transform:translateX(6px); } to { opacity:1; transform:none; } }
-.sim-le.good { background:rgba(0,232,150,.07); color:var(--green); }
-.sim-le.bad  { background:rgba(255,61,90,.07);  color:var(--red); }
-.sim-le.info { background:rgba(91,127,255,.07); color:var(--acc); }
-
-/* ════ TAB 5: UPLOAD ════ */
-#panel-upload { flex-direction:row; align-items:stretch; }
-#up-left {
-  flex:1; display:flex; flex-direction:column; align-items:center;
-  justify-content:center; padding:36px; gap:18px; border-right:1px solid var(--bd);
-  overflow-y:auto;
-}
-.up-drop {
-  width:100%; max-width:460px; border:2px dashed var(--bd2); border-radius:12px;
-  padding:44px 28px; text-align:center; cursor:pointer; transition:all .2s; background:var(--s1);
-}
-.up-drop:hover, .up-drop.over { border-color:var(--acc); background:rgba(91,127,255,.05); }
-.up-drop .udi { font-size:2.5rem; margin-bottom:10px; }
-.up-drop .udt { font-family:var(--head); font-size:.95rem; font-weight:700; color:#fff; margin-bottom:5px; }
-.up-drop .uds { font-size:.7rem; color:var(--muted); }
-#up-file-inp { display:none; }
-
-#up-preview-wrap { width:100%; max-width:460px; display:none; flex-direction:column; gap:12px; }
-#up-img { width:100%; max-height:300px; object-fit:cover; border-radius:10px; border:1px solid var(--bd2); display:block; }
-
-.up-btns { display:flex; gap:9px; }
-.up-btn {
-  flex:1; padding:9px; border-radius:7px; border:none;
-  font-size:.72rem; font-weight:700; font-family:var(--mono);
-  cursor:pointer; letter-spacing:.5px; transition:all .15s;
-}
-.up-btn:hover { transform:scale(1.02); }
-.up-btn.pri  { background:var(--acc); color:#fff; }
-.up-btn.sec  { background:var(--s3); color:var(--muted); border:1px solid var(--bd2); }
-.up-btn:disabled { opacity:.3; cursor:not-allowed; transform:none; }
-
-.up-loading { display:none; align-items:center; gap:10px; color:var(--muted); font-size:.68rem; }
-
-/* Upload right panel */
-#up-right { width:46%; flex-shrink:0; display:flex; flex-direction:column; }
-#upload-map { flex:1; }
-#up-result-bar {
-  padding:14px 16px; background:var(--s1); border-top:1px solid var(--bd);
-  font-size:.7rem; display:none;
-}
-#up-result-bar h4 { font-size:.58rem; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:10px; }
-.ur-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px 18px; }
-.ur-item { display:flex; justify-content:space-between; padding:3px 0; }
-.ur-item .k { color:var(--muted); } .ur-item .v { font-weight:600; color:var(--text); }
-
-/* ════ FINAL ════ */
-#final-overlay {
-  display:none; position:fixed; inset:0; z-index:9999;
-  background:rgba(7,9,15,.97); align-items:center; justify-content:center;
-  flex-direction:column; gap:26px; backdrop-filter:blur(12px);
-}
-#final-overlay.show { display:flex; }
-#final-overlay h1 { font-family:var(--head); font-size:2.3rem; font-weight:800; letter-spacing:1px; }
-#final-overlay h1.win { color:var(--green); } #final-overlay h1.lose { color:var(--red); } #final-overlay h1.tie { color:var(--yel); }
-#final-overlay p { color:var(--muted); font-size:.78rem; }
-.final-boxes { display:flex; gap:18px; }
-.fb { background:var(--s1); border:1px solid var(--bd2); border-radius:12px; padding:26px 44px; text-align:center; }
-.fb .fn { font-size:.58rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; }
-.fb .fs { font-size:2.7rem; font-weight:800; }
-.fb.p .fn, .fb.p .fs { color:var(--green); } .fb.a .fn, .fb.a .fs { color:var(--red); }
-#btn-again {
-  padding:12px 40px; background:var(--acc); color:#fff; border:none;
-  border-radius:8px; font-size:.82rem; font-weight:700; font-family:var(--mono);
-  cursor:pointer; letter-spacing:.5px; transition:all .2s;
-}
-#btn-again:hover { background:#7b9fff; transform:scale(1.04); }
-
-/* Leaflet overrides */
-.leaflet-tooltip {
-  background:rgba(13,16,24,.93) !important; border:1px solid var(--bd2) !important;
-  color:var(--text) !important; font-family:var(--mono) !important;
-  font-size:.6rem !important; border-radius:5px !important;
-  box-shadow:0 2px 10px rgba(0,0,0,.5) !important;
-}
-.leaflet-container { background:#08090f; }
-::-webkit-scrollbar { width:4px; height:4px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--bd2); border-radius:2px; }
-</style>
+<link rel="stylesheet" href="/static/css/main.css">
 </head>
 <body>
 
@@ -359,37 +33,52 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
 
   <!-- ── GAME ── -->
   <div class="panel active" id="panel-game">
-    <div id="g-img-col">
-      <div id="street-image-wrap">
-        <div id="g-load"><div class="spin"></div><p>Lade Bild…</p></div>
-        <img id="street-image" src="" alt="" style="display:none">
+
+    <!-- Fullscreen map (default) -->
+    <div id="game-map"></div>
+
+    <!-- 3D Globe (hidden by default) -->
+    <div id="globe-container"></div>
+
+    <!-- View toggle button top-right -->
+    <button id="view-toggle-btn" onclick="toggleView()">🌐 Globus</button>
+
+    <!-- Floating PIP image top-left -->
+    <div id="g-pip">
+      <div id="g-pip-load"><div class="spin"></div><p>Lade Bild…</p></div>
+      <img id="street-image" src="" alt="">
+      <div class="pip-bar">
+        <button class="pip-btn" onclick="togglePip()" title="Größe ändern">⤢</button>
+      </div>
+      <span id="pip-mode-badge">SIM</span>
+    </div>
+
+    <!-- Submit bar bottom-center -->
+    <div id="submit-bar">
+      <div id="guess-info">Klicke auf die Karte um zu raten</div>
+      <button id="submit-btn" disabled>Absenden →</button>
+    </div>
+
+    <!-- Result panel slides in from right -->
+    <div id="result-panel">
+      <div class="rp-title" id="rp-title"></div>
+      <div class="rp-row p">
+        <span class="rp-who">DU</span>
+        <span class="rp-dist" id="rp-pd"></span>
+        <span class="rp-pts"  id="rp-ps"></span>
+      </div>
+      <div style="text-align:center;font-size:.56rem;color:var(--muted);margin:2px 0 7px">— vs —</div>
+      <div class="rp-row a">
+        <span class="rp-who">KI</span>
+        <span class="rp-dist" id="rp-ad"></span>
+        <span class="rp-pts"  id="rp-as"></span>
+      </div>
+      <div class="rp-btns">
+        <button class="rp-btn restart" onclick="restartGame()">↺</button>
+        <button class="rp-btn next" id="btn-next">Weiter →</button>
       </div>
     </div>
-    <div id="g-map-col">
-      <div id="game-map"></div>
-      <div id="submit-bar">
-        <div id="guess-info">Klicke auf die Karte um zu raten</div>
-        <button id="submit-btn" disabled>Absenden →</button>
-      </div>
-      <div id="result-panel">
-        <div class="rp-title" id="rp-title"></div>
-        <div class="rp-row p">
-          <span class="rp-who">DU</span>
-          <span class="rp-dist" id="rp-pd"></span>
-          <span class="rp-pts"  id="rp-ps"></span>
-        </div>
-        <div style="text-align:center;font-size:.58rem;color:var(--muted);margin:1px 0 6px">— vs —</div>
-        <div class="rp-row a">
-          <span class="rp-who">KI</span>
-          <span class="rp-dist" id="rp-ad"></span>
-          <span class="rp-pts"  id="rp-as"></span>
-        </div>
-        <div class="rp-btns">
-          <button class="rp-btn restart" onclick="restartGame()">↺</button>
-          <button class="rp-btn next" id="btn-next">Weiter →</button>
-        </div>
-      </div>
-    </div>
+
   </div>
 
   <!-- ── DATASET ── -->
@@ -435,6 +124,12 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
       </div>
       <div id="chart-wrap">
         <div class="no-data" id="no-data">Noch keine Runden gespielt</div>
+      </div>
+    </div>
+    <div>
+      <div class="chart-head" style="margin-bottom:10px">SPIELVERLAUF</div>
+      <div class="hist-grid" id="hist-grid">
+        <div style="color:var(--muted);font-size:.7rem;grid-column:1/-1">Noch keine Runden gespielt</div>
       </div>
     </div>
   </div>
@@ -487,7 +182,6 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
         <div class="uds">Klicken oder Datei hierher ziehen<br>JPG · PNG · WEBP</div>
       </div>
       <input type="file" id="up-file-inp" accept="image/*" onchange="handleFileSelect(event)">
-
       <div id="up-preview-wrap">
         <img id="up-img" src="" alt="">
         <div class="up-btns">
@@ -499,7 +193,6 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
         </div>
       </div>
     </div>
-
     <div id="up-right">
       <div id="upload-map"></div>
       <div id="up-result-bar">
@@ -516,7 +209,7 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
 
 </div><!-- /panels -->
 
-<!-- ──── FINAL ──── -->
+<!-- ──── FINAL OVERLAY ──── -->
 <div id="final-overlay">
   <h1 id="fin-title"></h1>
   <p  id="fin-sub"></p>
@@ -527,397 +220,16 @@ body { font-family:var(--mono); background:var(--bg); color:var(--text); display
   <button id="btn-again" onclick="restartGame()">Nochmal spielen</button>
 </div>
 
-<script>
-// ── GLOBALS ──────────────────────────────────────────────────────────────────
-const TOTAL_ROUNDS = {{ rounds }};
-let round=1, totalP=0, totalA=0;
-let playerMarker=null, pLat=null, pLon=null, currentData=null;
-let history=[];
-let gameMap=null, dsMap=null, simMap=null, upMap=null;
-let upResultMarker=null, uploadFile=null;
-let simRunning=false, simTmo=null, simIdx=0, simNTotal=0;
-let simDists=[], simScores=[];
-let dsSelectedIdx=null;
+<!-- ──── SCRIPTS ──── -->
+<!-- Template variable for Flask -->
+<script>const TOTAL_ROUNDS = {{ rounds }};</script>
+<!-- External libraries -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/globe.gl"></script>
+<!-- App scripts (load order matters: main → game → extras) -->
+<script src="/static/js/main.js"></script>
+<script src="/static/js/game.js"></script>
+<script src="/static/js/extras.js"></script>
 
-const TILE = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-const TILE_OPT = { attribution:'© OpenStreetMap, © CARTO', maxZoom:18 };
-
-function mkIcon(col, sz=14) {
-  return L.divIcon({
-    className:'',
-    html:`<div style="width:${sz}px;height:${sz}px;background:${col};border:2px solid rgba(255,255,255,.75);border-radius:50%;box-shadow:0 0 8px ${col}99"></div>`,
-    iconSize:[sz,sz], iconAnchor:[sz/2,sz/2]
-  });
-}
-
-// ── TABS ─────────────────────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab===name));
-  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id==='panel-'+name));
-  if (name==='dataset' && !dsMap)  initDsMap();
-  if (name==='sim'     && !simMap) initSimMap();
-  if (name==='upload'  && !upMap)  initUpMap();
-  if (name==='stats')              renderChart();
-}
-
-// ── GAME MAP ─────────────────────────────────────────────────────────────────
-gameMap = L.map('game-map', { center:[20,0], zoom:2 });
-L.tileLayer(TILE, TILE_OPT).addTo(gameMap);
-
-gameMap.on('click', e => {
-  if (document.getElementById('result-panel').classList.contains('show')) return;
-  pLat=e.latlng.lat; pLon=e.latlng.lng;
-  if (playerMarker) gameMap.removeLayer(playerMarker);
-  playerMarker = L.marker([pLat,pLon], {icon:mkIcon('#00e896',14)})
-    .addTo(gameMap).bindTooltip('Deine Schätzung',{permanent:false});
-  document.getElementById('guess-info').textContent=`${pLat.toFixed(3)}°N  ${pLon.toFixed(3)}°E`;
-  document.getElementById('guess-info').classList.add('on');
-  document.getElementById('submit-btn').disabled=false;
-});
-
-async function loadGameImage() {
-  pLat=null; pLon=null;
-  document.getElementById('submit-btn').disabled=true;
-  document.getElementById('guess-info').textContent='Klicke auf die Karte um zu raten';
-  document.getElementById('guess-info').classList.remove('on');
-  document.getElementById('g-load').style.display='flex';
-  document.getElementById('street-image').style.display='none';
-  if (playerMarker) { gameMap.removeLayer(playerMarker); playerMarker=null; }
-  const res=await fetch('/api/image'); currentData=await res.json();
-  const img=document.getElementById('street-image');
-  img.onload=()=>{ document.getElementById('g-load').style.display='none'; img.style.display='block'; };
-  img.src='data:image/jpeg;base64,'+currentData.img;
-}
-
-document.getElementById('submit-btn').addEventListener('click', async ()=>{
-  if (!pLat) return;
-  document.getElementById('submit-btn').disabled=true;
-  const res=await fetch('/api/guess',{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({idx:currentData.idx, lat:pLat, lon:pLon})
-  });
-  showResult(await res.json());
-});
-
-function showResult(d) {
-  const {true_lat,true_lon,ai_lat,ai_lon,ai_conf,player_score,ai_score,player_dist,ai_dist,winner}=d;
-  L.marker([true_lat,true_lon],{icon:mkIcon('#ffcc00',18)})
-    .addTo(gameMap).bindTooltip('Wahrer Ort',{permanent:true,direction:'top'});
-  L.marker([ai_lat,ai_lon],{icon:mkIcon('#ff3d5a',14)})
-    .addTo(gameMap).bindTooltip(`KI · ${ai_conf}%`,{permanent:false});
-  if (pLat) L.polyline([[pLat,pLon],[true_lat,true_lon]],
-    {color:'#00e896',weight:2,dashArray:'5,4',opacity:.7}).addTo(gameMap);
-  L.polyline([[ai_lat,ai_lon],[true_lat,true_lon]],
-    {color:'#ff3d5a',weight:2,dashArray:'5,4',opacity:.7}).addTo(gameMap);
-  const pts=[[true_lat,true_lon],[ai_lat,ai_lon]];
-  if (pLat) pts.push([pLat,pLon]);
-  gameMap.fitBounds(L.latLngBounds(pts),{padding:[60,60]});
-
-  totalP+=player_score; totalA+=ai_score;
-  document.getElementById('hdr-p').textContent=totalP.toLocaleString();
-  document.getElementById('hdr-a').textContent=totalA.toLocaleString();
-
-  history.push({img:currentData.img,true_lat,true_lon,ai_lat,ai_lon,
-    ai_conf,player_score,ai_score,player_dist,ai_dist,winner,round});
-
-  const t=document.getElementById('rp-title');
-  if (winner==='player'){t.textContent='🎉 Du gewinnst!';t.className='rp-title win';}
-  else if (winner==='ai'){t.textContent='🤖 KI gewinnt!';t.className='rp-title lose';}
-  else{t.textContent='🤝 Unentschieden!';t.className='rp-title tie';}
-  document.getElementById('rp-pd').textContent=player_dist.toLocaleString()+' km';
-  document.getElementById('rp-ps').textContent=player_score.toLocaleString()+' Pts';
-  document.getElementById('rp-ad').textContent=ai_dist.toLocaleString()+' km';
-  document.getElementById('rp-as').textContent=ai_score.toLocaleString()+' Pts';
-
-  const btn=document.getElementById('btn-next');
-  btn.textContent=round>=TOTAL_ROUNDS?'Ergebnis →':'Weiter →';
-  btn.onclick=round>=TOTAL_ROUNDS?showFinal:nextRound;
-  document.getElementById('result-panel').classList.add('show');
-}
-
-function nextRound() {
-  round++;
-  document.getElementById('hdr-r').textContent=round;
-  document.getElementById('result-panel').classList.remove('show');
-  gameMap.eachLayer(l=>{ if(l instanceof L.Marker||l instanceof L.Polyline) gameMap.removeLayer(l); });
-  gameMap.setView([20,0],2);
-  loadGameImage();
-}
-
-function showFinal() {
-  document.getElementById('result-panel').classList.remove('show');
-  document.getElementById('fin-p').textContent=totalP.toLocaleString();
-  document.getElementById('fin-a').textContent=totalA.toLocaleString();
-  const t=document.getElementById('fin-title'), s=document.getElementById('fin-sub');
-  if (totalP>totalA){t.textContent='🏆 Du hast gewonnen!';t.className='win';s.textContent=`+${(totalP-totalA).toLocaleString()} Pts Vorsprung`;}
-  else if (totalA>totalP){t.textContent='🤖 KI gewinnt!';t.className='lose';s.textContent=`KI war ${(totalA-totalP).toLocaleString()} Pts besser`;}
-  else{t.textContent='🤝 Unentschieden!';t.className='tie';s.textContent='Gleichstand';}
-  document.getElementById('final-overlay').classList.add('show');
-}
-
-function restartGame() {
-  round=1; totalP=0; totalA=0; history=[];
-  document.getElementById('hdr-p').textContent='0';
-  document.getElementById('hdr-a').textContent='0';
-  document.getElementById('hdr-r').textContent='1';
-  document.getElementById('result-panel').classList.remove('show');
-  document.getElementById('final-overlay').classList.remove('show');
-  gameMap.eachLayer(l=>{ if(l instanceof L.Marker||l instanceof L.Polyline) gameMap.removeLayer(l); });
-  gameMap.setView([20,0],2); stopSim(); loadGameImage();
-}
-
-// ── DATASET MAP ───────────────────────────────────────────────────────────────
-function initDsMap() {
-  dsMap = L.map('dataset-map', {center:[20,0], zoom:2});
-  L.tileLayer(TILE, TILE_OPT).addTo(dsMap);
-  fetchDsPoints();
-}
-
-async function fetchDsPoints() {
-  const res=await fetch('/api/dataset_points');
-  const pts=await res.json();
-  pts.forEach(p => {
-    const m=L.circleMarker([p.lat,p.lon],{
-      radius:4, color:'#3b82f6', fillColor:'#3b82f6', fillOpacity:.7, weight:1
-    }).addTo(dsMap);
-    m.on('click',()=>selectDsPoint(p));
-    m.on('mouseover',()=>m.setStyle({radius:7,fillColor:'#5b7fff'}));
-    m.on('mouseout', ()=>m.setStyle({radius:4,fillColor:'#3b82f6'}));
-  });
-}
-
-function selectDsPoint(p) {
-  dsSelectedIdx=p.idx;
-  document.getElementById('ds-lat').textContent=p.lat.toFixed(5)+'°';
-  document.getElementById('ds-lon').textContent=p.lon.toFixed(5)+'°';
-  document.getElementById('ds-idx').textContent='#'+p.idx;
-  document.getElementById('ds-empty').style.display='none';
-  document.getElementById('ds-info').style.display='block';
-  document.getElementById('ds-img-wrap').style.display='none';
-  document.getElementById('ds-img').src='';
-  fetchDsImage(p.idx);
-}
-
-async function fetchDsImage(idx) {
-  document.getElementById('ds-load-spin').style.display='block';
-  const res=await fetch(`/api/image_by_idx?idx=${idx}`);
-  const d=await res.json();
-  const img=document.getElementById('ds-img');
-  img.onload=()=>{ document.getElementById('ds-load-spin').style.display='none'; document.getElementById('ds-img-wrap').style.display='block'; };
-  img.src='data:image/jpeg;base64,'+d.img;
-}
-
-// ── STATS CHART ───────────────────────────────────────────────────────────────
-function renderChart() {
-  const n=history.length;
-  document.getElementById('stats-sub').textContent=`${n} Runde${n!==1?'n':''} gespielt`;
-  document.getElementById('st-pt').textContent=totalP.toLocaleString();
-  document.getElementById('st-at').textContent=totalA.toLocaleString();
-  if (!n) { document.getElementById('no-data').style.display='flex'; return; }
-  const avgP=Math.round(history.reduce((s,r)=>s+r.player_dist,0)/n);
-  const avgA=Math.round(history.reduce((s,r)=>s+r.ai_dist,0)/n);
-  document.getElementById('st-pd').textContent=avgP.toLocaleString()+' km';
-  document.getElementById('st-ad').textContent=avgA.toLocaleString()+' km';
-
-  const wrap=document.getElementById('chart-wrap');
-  const W=wrap.offsetWidth||600, H=260;
-  const PAD={t:18,r:20,b:38,l:54};
-  const cW=W-PAD.l-PAD.r, cH=H-PAD.t-PAD.b;
-  const MAX_DIST=12000;
-  const acc=km=>Math.max(0,(1-km/MAX_DIST))*100;
-  const xS=i=>PAD.l+(n>1?(i/(n-1))*cW:cW/2);
-  const yS=a=>PAD.t+(1-a/100)*cH;
-  const fm="font-family:'IBM Plex Mono',monospace;font-size:10px;fill:#485570";
-
-  let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">`;
-
-  // Grid
-  [0,25,50,75,100].forEach(pct=>{
-    const y=yS(pct);
-    svg+=`<line x1="${PAD.l}" y1="${y}" x2="${W-PAD.r}" y2="${y}" stroke="#1e2535" stroke-width="1"/>`;
-    svg+=`<text x="${PAD.l-7}" y="${y+4}" text-anchor="end" style="${fm}">${pct}%</text>`;
-  });
-  // Y axis label
-  svg+=`<text x="12" y="${H/2}" text-anchor="middle" transform="rotate(-90,12,${H/2})" style="${fm}">GENAUIGKEIT</text>`;
-  // X labels + tick marks
-  history.forEach((_,i)=>{
-    const x=xS(i);
-    svg+=`<line x1="${x}" y1="${PAD.t+cH}" x2="${x}" y2="${PAD.t+cH+4}" stroke="#485570" stroke-width="1"/>`;
-    svg+=`<text x="${x}" y="${H-6}" text-anchor="middle" style="${fm}">R${i+1}</text>`;
-  });
-
-  // Shaded area player
-  if (n>1) {
-    let pathP=history.map((r,i)=>`${i===0?'M':'L'}${xS(i)},${yS(acc(r.player_dist))}`).join(' ');
-    let areaP=pathP+` L${xS(n-1)},${yS(0)} L${xS(0)},${yS(0)} Z`;
-    svg+=`<path d="${areaP}" fill="#00e896" fill-opacity=".06"/>`;
-    svg+=`<path d="${pathP}" fill="none" stroke="#00e896" stroke-width="2" opacity=".6"/>`;
-    let pathA=history.map((r,i)=>`${i===0?'M':'L'}${xS(i)},${yS(acc(r.ai_dist))}`).join(' ');
-    let areaA=pathA+` L${xS(n-1)},${yS(0)} L${xS(0)},${yS(0)} Z`;
-    svg+=`<path d="${areaA}" fill="#ff3d5a" fill-opacity=".06"/>`;
-    svg+=`<path d="${pathA}" fill="none" stroke="#ff3d5a" stroke-width="2" opacity=".6"/>`;
-  }
-
-  // Dots with tooltips
-  history.forEach((r,i)=>{
-    const px=xS(i),py=yS(acc(r.player_dist));
-    const ax=xS(i),ay=yS(acc(r.ai_dist));
-    svg+=`<circle cx="${px}" cy="${py}" r="5" fill="#00e896">
-      <title>R${i+1} Du: ${Math.round(acc(r.player_dist))}% (${r.player_dist.toLocaleString()} km)</title></circle>`;
-    svg+=`<circle cx="${ax}" cy="${ay}" r="5" fill="#ff3d5a">
-      <title>R${i+1} KI: ${Math.round(acc(r.ai_dist))}% (${r.ai_dist.toLocaleString()} km)</title></circle>`;
-    // Win marker
-    if (r.winner==='player')
-      svg+=`<text x="${px}" y="${py-10}" text-anchor="middle" style="font-size:9px;fill:#00e896">▲</text>`;
-    else if (r.winner==='ai')
-      svg+=`<text x="${ax}" y="${ay-10}" text-anchor="middle" style="font-size:9px;fill:#ff3d5a">▲</text>`;
-  });
-
-  svg+=`</svg>`;
-  wrap.innerHTML=svg;
-}
-
-// ── SIMULATION ────────────────────────────────────────────────────────────────
-function initSimMap() {
-  simMap=L.map('sim-map',{center:[20,0],zoom:2});
-  L.tileLayer(TILE,TILE_OPT).addTo(simMap);
-}
-
-function simLog(msg, pts, cls) {
-  const el=document.createElement('div');
-  el.className='sim-le '+cls;
-  el.innerHTML=`<span>${msg}</span><span>${pts}</span>`;
-  const log=document.getElementById('sim-log');
-  log.appendChild(el); log.scrollTop=log.scrollHeight;
-}
-
-async function runSimRound() {
-  if (!simRunning) return;
-  simIdx++;
-  document.getElementById('sim-ptxt').textContent=`Runde ${simIdx} / ${simNTotal}`;
-  document.getElementById('sim-ppct').textContent=Math.round(simIdx/simNTotal*100)+'%';
-
-  const imgRes=await fetch('/api/image'); const imgData=await imgRes.json();
-  const res=await fetch('/api/guess',{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({idx:imgData.idx, lat:0, lon:0})
-  });
-  const d=await res.json();
-
-  simDists.push(d.ai_dist); simScores.push(d.ai_score);
-  simMap.eachLayer(l=>{ if(l instanceof L.Marker||l instanceof L.Polyline) simMap.removeLayer(l); });
-  L.marker([d.true_lat,d.true_lon],{icon:mkIcon('#ffcc00',16)})
-    .addTo(simMap).bindTooltip('Wahrer Ort',{permanent:true,direction:'top'});
-  L.marker([d.ai_lat,d.ai_lon],{icon:mkIcon('#ff3d5a',12)})
-    .addTo(simMap).bindTooltip(`KI · ${d.ai_conf}%`,{permanent:false});
-  L.polyline([[d.ai_lat,d.ai_lon],[d.true_lat,d.true_lon]],
-    {color:'#ff3d5a',weight:2,dashArray:'5,4',opacity:.6}).addTo(simMap);
-  simMap.fitBounds(L.latLngBounds([[d.true_lat,d.true_lon],[d.ai_lat,d.ai_lon]]),{padding:[70,70]});
-
-  const tot=simScores.reduce((a,b)=>a+b,0);
-  const avgD=Math.round(simDists.reduce((a,b)=>a+b,0)/simDists.length);
-  document.getElementById('ss-r').textContent=simIdx;
-  document.getElementById('ss-t').textContent=tot.toLocaleString();
-  document.getElementById('ss-d').textContent=avgD.toLocaleString()+' km';
-  document.getElementById('ss-b').textContent=Math.max(...simScores).toLocaleString()+' Pts';
-  document.getElementById('ss-w').textContent=Math.min(...simScores).toLocaleString()+' Pts';
-
-  const cls=d.ai_score>3000?'good':d.ai_score>1000?'info':'bad';
-  simLog(`R${simIdx}: ${d.ai_dist.toLocaleString()} km`, `${d.ai_score.toLocaleString()} Pts`, cls);
-
-  if (simIdx>=simNTotal||!simRunning) { stopSim(); return; }
-
-  const cd=parseInt(document.getElementById('sim-cd').value)*1000;
-  const bar=document.getElementById('sim-pbar'); const t0=Date.now();
-  const tick=setInterval(()=>{ if(!simRunning){clearInterval(tick);return;} bar.style.width=Math.min(100,(Date.now()-t0)/cd*100)+'%'; },50);
-  simTmo=setTimeout(()=>{ clearInterval(tick); runSimRound(); }, cd);
-}
-
-function startSim() {
-  simNTotal=parseInt(document.getElementById('sim-nr').value);
-  simIdx=0; simDists=[]; simScores=[]; simRunning=true;
-  document.getElementById('sim-log').innerHTML='';
-  document.getElementById('sim-start').style.display='none';
-  document.getElementById('sim-stop').style.display='';
-  ['ss-r','ss-t','ss-d','ss-b','ss-w'].forEach(id=>document.getElementById(id).textContent='—');
-  document.getElementById('ss-r').textContent='0';
-  document.getElementById('ss-t').textContent='0';
-  simLog('Simulation gestartet',`${simNTotal} Runden`,'info');
-  if (!simMap) initSimMap();
-  runSimRound();
-}
-
-function stopSim() {
-  simRunning=false; if(simTmo) clearTimeout(simTmo);
-  document.getElementById('sim-start').style.display='';
-  document.getElementById('sim-stop').style.display='none';
-  document.getElementById('sim-pbar').style.width='0%';
-  if (simIdx>0) simLog('— Beendet —','','info');
-}
-
-// ── UPLOAD ────────────────────────────────────────────────────────────────────
-function initUpMap() {
-  upMap=L.map('upload-map',{center:[20,0],zoom:2});
-  L.tileLayer(TILE,TILE_OPT).addTo(upMap);
-}
-function handleDrop(e) {
-  e.preventDefault(); document.getElementById('up-drop').classList.remove('over');
-  const f=e.dataTransfer.files[0]; if(f&&f.type.startsWith('image/')) setUpFile(f);
-}
-function handleFileSelect(e) { const f=e.target.files[0]; if(f) setUpFile(f); }
-function setUpFile(f) {
-  uploadFile=f; const r=new FileReader();
-  r.onload=ev=>{
-    document.getElementById('up-img').src=ev.target.result;
-    document.getElementById('up-drop').style.display='none';
-    document.getElementById('up-preview-wrap').style.display='flex';
-    document.getElementById('up-result-bar').style.display='none';
-    document.getElementById('up-loading').style.display='none';
-    document.getElementById('up-run-btn').disabled=false;
-  };
-  r.readAsDataURL(f);
-}
-function resetUpload() {
-  uploadFile=null;
-  document.getElementById('up-drop').style.display='';
-  document.getElementById('up-preview-wrap').style.display='none';
-  document.getElementById('up-file-inp').value='';
-  document.getElementById('up-result-bar').style.display='none';
-  if (upResultMarker&&upMap) { upMap.removeLayer(upResultMarker); upResultMarker=null; }
-}
-
-async function runUpload() {
-  const btn=document.getElementById('up-run-btn');
-  btn.disabled=true; document.getElementById('up-loading').style.display='flex';
-  const r=new FileReader();
-  r.onload=async ev=>{
-    const b64=ev.target.result.split(',')[1];
-    try {
-      const res=await fetch('/api/guess_image',{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({img:b64})
-      });
-      const d=await res.json();
-      document.getElementById('ur-lat').textContent=d.lat.toFixed(4)+'°';
-      document.getElementById('ur-lon').textContent=d.lon.toFixed(4)+'°';
-      document.getElementById('ur-conf').textContent=d.conf+'%';
-      document.getElementById('ur-reg').textContent=d.location||'—';
-      document.getElementById('up-result-bar').style.display='block';
-      document.getElementById('up-loading').style.display='none';
-      if (!upMap) initUpMap();
-      if (upResultMarker) upMap.removeLayer(upResultMarker);
-      upResultMarker=L.marker([d.lat,d.lon],{icon:mkIcon('#ff3d5a',18)})
-        .addTo(upMap).bindTooltip(`KI-Schätzung · ${d.conf}% Konfidenz`,{permanent:true,direction:'top'});
-      upMap.setView([d.lat,d.lon],5);
-    } catch(err) { document.getElementById('up-loading').style.display='none'; alert('Fehler: '+err.message); }
-    btn.disabled=false;
-  };
-  r.readAsDataURL(uploadFile);
-}
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-document.getElementById('hdr-t').textContent=TOTAL_ROUNDS;
-loadGameImage();
-</script>
 </body>
 </html>

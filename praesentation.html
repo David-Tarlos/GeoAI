@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>GeoAI Präsentation</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { width:100%; height:100%; background:#07090f; overflow:hidden; }
+body { font-family:'IBM Plex Mono',monospace; color:#bcc8e0; }
+
+/* ── SLIDES ── */
+.slide {
+  display:none; position:absolute; inset:0;
+  flex-direction:column; align-items:center; justify-content:center;
+  padding:60px 80px; gap:28px;
+  animation: fadeIn .4s ease;
+}
+.slide.active { display:flex; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
+/* ── PROGRESS ── */
+#progress {
+  position:fixed; bottom:0; left:0; right:0; height:3px; background:#1a2030; z-index:100;
+}
+#progress-bar { height:100%; background:#5b7fff; transition:width .3s ease; }
+#slide-counter {
+  position:fixed; bottom:14px; right:20px;
+  font-size:.58rem; color:#485570; letter-spacing:1px; z-index:100;
+}
+#nav-hint {
+  position:fixed; bottom:14px; left:20px;
+  font-size:.58rem; color:#485570; letter-spacing:1px; z-index:100;
+}
+
+/* ── TYPOGRAPHY ── */
+.tag {
+  font-size:.6rem; letter-spacing:3px; text-transform:uppercase;
+  color:#5b7fff; border:1px solid #1e2535; border-radius:20px; padding:4px 14px;
+}
+h1 {
+  font-family:'Syne',sans-serif; font-size:3.4rem; font-weight:800;
+  color:#fff; text-align:center; line-height:1.1;
+}
+h1 em { color:#5b7fff; font-style:normal; }
+h2 {
+  font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; color:#fff;
+  text-align:center;
+}
+h2 em { color:#5b7fff; font-style:normal; }
+.sub { font-size:.78rem; color:#485570; text-align:center; }
+
+/* ── CARDS ── */
+.cards { display:flex; gap:16px; width:100%; max-width:900px; }
+.card {
+  flex:1; background:#0d1018; border:1px solid #1e2535; border-radius:12px;
+  padding:22px 20px; display:flex; flex-direction:column; gap:10px;
+}
+.card .icon { font-size:1.6rem; }
+.card .ct { font-size:.6rem; text-transform:uppercase; letter-spacing:2px; color:#485570; }
+.card .cv { font-size:.82rem; color:#bcc8e0; line-height:1.6; }
+.card.green { border-color:rgba(0,232,150,.2); }
+.card.red   { border-color:rgba(255,61,90,.2); }
+.card.blue  { border-color:rgba(91,127,255,.2); }
+.card.yel   { border-color:rgba(255,204,0,.2); }
+
+/* ── PIPELINE ── */
+.pipe { display:flex; align-items:center; gap:0; width:100%; max-width:860px; }
+.pipe-step {
+  flex:1; background:#0d1018; border:1px solid #1e2535; border-radius:10px;
+  padding:16px 12px; text-align:center;
+}
+.pipe-step .ps-icon { font-size:1.4rem; margin-bottom:6px; }
+.pipe-step .ps-t { font-size:.58rem; text-transform:uppercase; letter-spacing:1px; color:#485570; margin-bottom:3px; }
+.pipe-step .ps-v { font-size:.72rem; color:#bcc8e0; }
+.pipe-arrow { color:#1e2535; font-size:1.2rem; padding:0 6px; flex-shrink:0; }
+
+/* ── CODE BLOCK ── */
+.code {
+  background:#0d1018; border:1px solid #1e2535; border-radius:10px;
+  padding:20px 24px; font-size:.72rem; line-height:1.8; width:100%; max-width:700px;
+}
+.code .cm { color:#485570; }
+.code .ck { color:#5b7fff; }
+.code .cv { color:#00e896; }
+.code .cs { color:#ffcc00; }
+
+/* ── BIG NUMBERS ── */
+.bignums { display:flex; gap:20px; }
+.bignum {
+  background:#0d1018; border:1px solid #1e2535; border-radius:12px;
+  padding:22px 30px; text-align:center; min-width:140px;
+}
+.bignum .bn { font-family:'Syne',sans-serif; font-size:2.4rem; font-weight:800; }
+.bignum .bl { font-size:.58rem; text-transform:uppercase; letter-spacing:1.5px; color:#485570; margin-top:4px; }
+.bignum.g .bn { color:#00e896; }
+.bignum.r .bn { color:#ff3d5a; }
+.bignum.b .bn { color:#5b7fff; }
+.bignum.y .bn { color:#ffcc00; }
+
+/* ── COMPARISON ── */
+.vs-row { display:flex; gap:12px; width:100%; max-width:800px; align-items:center; }
+.vs-box {
+  flex:1; background:#0d1018; border-radius:10px; padding:18px 20px;
+}
+.vs-box.bad  { border:1px solid rgba(255,61,90,.25); }
+.vs-box.good { border:1px solid rgba(0,232,150,.25); }
+.vs-box .vt { font-size:.58rem; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px; }
+.vs-box.bad  .vt { color:#ff3d5a; }
+.vs-box.good .vt { color:#00e896; }
+.vs-box ul { list-style:none; display:flex; flex-direction:column; gap:6px; }
+.vs-box li { font-size:.72rem; color:#bcc8e0; padding-left:14px; position:relative; }
+.vs-box li::before { content:'→'; position:absolute; left:0; color:#485570; }
+.vs-sep { font-family:'Syne',sans-serif; font-size:1.4rem; color:#1e2535; flex-shrink:0; }
+
+/* ── TABS PREVIEW ── */
+.tab-row { display:flex; gap:8px; }
+.tab-pill {
+  padding:6px 14px; border-radius:20px; font-size:.62rem; letter-spacing:1px;
+  text-transform:uppercase; border:1px solid #1e2535;
+}
+.tab-pill.act { background:#5b7fff; color:#fff; border-color:#5b7fff; }
+.tab-pill.def { color:#485570; }
+
+/* ── SLIDE 1: TITLE ── */
+#s1 { background: radial-gradient(ellipse at 50% 40%, #0d1830 0%, #07090f 70%); }
+#s1 h1 { font-size:4rem; }
+.tagline { font-size:.82rem; color:#485570; }
+.author  { font-size:.65rem; color:#273045; letter-spacing:2px; text-transform:uppercase; }
+
+/* ── SLIDE 7: DEMO ── */
+#s7 { background: radial-gradient(ellipse at 50% 40%, #0d1a0d 0%, #07090f 70%); }
+.demo-big { font-family:'Syne',sans-serif; font-size:5rem; font-weight:800; color:#00e896; }
+</style>
+</head>
+<body>
+
+<!-- ─────────────── SLIDE 1: TITEL ─────────────── -->
+<div class="slide active" id="s1">
+  <div class="tag">Schulprojekt · KI · Deep Learning</div>
+  <h1>Geo<em>AI</em></h1>
+  <p class="tagline">Ein neuronales Netz errät, wo auf der Welt ein Foto aufgenommen wurde</p>
+  <div style="height:1px;width:80px;background:#1e2535"></div>
+  <p class="author">Mensch vs. KI · Street View · EfficientNet</p>
+</div>
+
+<!-- ─────────────── SLIDE 2: PROBLEM ─────────────── -->
+<div class="slide" id="s2">
+  <div class="tag">Das Problem</div>
+  <h2>Wo auf der Welt ist dieses Foto?</h2>
+  <div class="cards">
+    <div class="card blue">
+      <div class="icon">🌍</div>
+      <div class="ct">Aufgabe</div>
+      <div class="cv">Ein Bild zeigen → vorhersagen in welchem Land / welcher Region es aufgenommen wurde</div>
+    </div>
+    <div class="card">
+      <div class="icon">📊</div>
+      <div class="ct">Dataset</div>
+      <div class="cv">10.000 Google Street View Bilder weltweit mit GPS-Koordinaten</div>
+    </div>
+    <div class="card">
+      <div class="icon">🎯</div>
+      <div class="ct">Ziel</div>
+      <div class="cv">Distanz zwischen Vorhersage und echtem Ort so klein wie möglich halten</div>
+    </div>
+  </div>
+  <p class="sub">Welt aufgeteilt in 10°×10° Gitterzellen → 145 Klassen</p>
+</div>
+
+<!-- ─────────────── SLIDE 3: PIPELINE ─────────────── -->
+<div class="slide" id="s3">
+  <div class="tag">Wie funktioniert es?</div>
+  <h2>Die <em>Pipeline</em></h2>
+  <div class="pipe">
+    <div class="pipe-step">
+      <div class="ps-icon">🖼</div>
+      <div class="ps-t">Input</div>
+      <div class="ps-v">Street View Bild 224×224px</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="ps-icon">🧠</div>
+      <div class="ps-t">EfficientNet-B0</div>
+      <div class="ps-v">Vortrainiertes CNN erkennt Merkmale</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="ps-icon">🗂</div>
+      <div class="ps-t">Klassifikation</div>
+      <div class="ps-v">145 Gitterzellen weltweit</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="ps-icon">📍</div>
+      <div class="ps-t">Koordinaten</div>
+      <div class="ps-v">Zellmittelpunkt → Lat/Lon</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="ps-icon">📏</div>
+      <div class="ps-t">Distanz</div>
+      <div class="ps-v">Haversine km zum echten Ort</div>
+    </div>
+  </div>
+  <p class="sub">Transfer Learning: EfficientNet kennt schon Kanten, Texturen, Strukturen → wir trainieren nur den Kopf neu</p>
+</div>
+
+<!-- ─────────────── SLIDE 4: OVERFITTING ─────────────── -->
+<div class="slide" id="s4">
+  <div class="tag">Das größte Problem</div>
+  <h2><em>Overfitting</em> – und wie wir es gelöst haben</h2>
+  <div class="vs-row">
+    <div class="vs-box bad">
+      <div class="vt">❌ Vorher (Overfitting)</div>
+      <ul>
+        <li>Train-Accuracy: 99%</li>
+        <li>Val-Accuracy: 43%</li>
+        <li>Modell lernte Bilder auswendig</li>
+        <li>Auf neuen Bildern: schlecht</li>
+      </ul>
+    </div>
+    <div class="vs-sep">→</div>
+    <div class="vs-box good">
+      <div class="vt">✓ Nachher (unsere Fixes)</div>
+      <ul>
+        <li>Backbone eingefroren (Phase 1)</li>
+        <li>Dropout erhöht: 0.3 → 0.5</li>
+        <li>Stärkere Augmentierung</li>
+        <li>Weight Decay: 1e-4 → 1e-3</li>
+      </ul>
+    </div>
+  </div>
+  <p class="sub">Analogie: Schüler der Prüfungen auswendig lernt vs. der das Konzept wirklich versteht</p>
+</div>
+
+<!-- ─────────────── SLIDE 5: TRAINING ─────────────── -->
+<div class="slide" id="s5">
+  <div class="tag">Training</div>
+  <h2>Zweiphasen-<em>Training</em></h2>
+  <div class="cards" style="max-width:800px">
+    <div class="card blue">
+      <div class="icon">❄️</div>
+      <div class="ct">Phase 1 · Epochen 1–8</div>
+      <div class="cv">
+        Backbone eingefroren<br>
+        Nur 300k Parameter lernen<br>
+        Kopf lernt Gitterzellen kennen<br>
+        <br>
+        <span style="color:#5b7fff">LR = 3e-4</span>
+      </div>
+    </div>
+    <div class="card green">
+      <div class="icon">🔥</div>
+      <div class="ct">Phase 2 · Epochen 9–30</div>
+      <div class="cv">
+        Ganzes Netz aktiv<br>
+        4.7M Parameter feintunen<br>
+        EfficientNet lernt Geo-Merkmale<br>
+        <br>
+        <span style="color:#00e896">LR = 5e-5 (sehr niedrig)</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="icon">💾</div>
+      <div class="ct">Checkpoint-System</div>
+      <div class="cv">
+        Speichert nur wenn Val-Loss besser<br>
+        Kann jederzeit fortgesetzt werden<br>
+        Training-History gespeichert<br>
+        <br>
+        <span style="color:#485570">best_model.pth</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────── SLIDE 6: SPIEL ─────────────── -->
+<div class="slide" id="s6">
+  <div class="tag">Das Produkt</div>
+  <h2>GeoAI <em>Spiel</em> – Mensch vs. KI</h2>
+  <div class="tab-row" style="margin-bottom:4px">
+    <div class="tab-pill act">🎮 Spiel</div>
+    <div class="tab-pill def">🗺 Dataset</div>
+    <div class="tab-pill def">📊 Statistik</div>
+    <div class="tab-pill def">🤖 Simulation</div>
+    <div class="tab-pill def">📤 Upload</div>
+  </div>
+  <div class="cards" style="max-width:860px">
+    <div class="card green">
+      <div class="icon">🎮</div>
+      <div class="ct">Spiel</div>
+      <div class="cv">Du vs. KI · 5 Runden · Punkte nach Distanz (0–5000)</div>
+    </div>
+    <div class="card blue">
+      <div class="icon">🤖</div>
+      <div class="ct">Simulation</div>
+      <div class="cv">KI spielt alleine · beliebig viele Runden · Live-Statistiken</div>
+    </div>
+    <div class="card yel">
+      <div class="icon">📤</div>
+      <div class="ct">Eigenes Bild</div>
+      <div class="cv">Beliebiges Bild hochladen → KI schätzt den Ort auf der Weltkarte</div>
+    </div>
+  </div>
+  <p class="sub">Öffentlich spielbar via ngrok-Link · läuft lokal auf unserem PC</p>
+</div>
+
+<!-- ─────────────── SLIDE 7: DEMO ─────────────── -->
+<div class="slide" id="s7">
+  <div class="tag">Live</div>
+  <div class="demo-big">Demo</div>
+  <p style="font-size:.9rem;color:#485570">localhost:5000</p>
+  <div class="bignums" style="margin-top:12px">
+    <div class="bignum b">
+      <div class="bn">10k</div>
+      <div class="bl">Bilder</div>
+    </div>
+    <div class="bignum g">
+      <div class="bn">145</div>
+      <div class="bl">Klassen</div>
+    </div>
+    <div class="bignum y">
+      <div class="bn">4.7M</div>
+      <div class="bl">Parameter</div>
+    </div>
+    <div class="bignum r">
+      <div class="bn">30</div>
+      <div class="bl">Epochen</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────── NAVIGATION ─────────────── -->
+<div id="progress"><div id="progress-bar"></div></div>
+<div id="slide-counter">1 / 7</div>
+<div id="nav-hint">← → oder Klick</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total  = slides.length;
+let cur = 0;
+
+function go(n) {
+  slides[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(total-1, n));
+  slides[cur].classList.add('active');
+  document.getElementById('slide-counter').textContent = `${cur+1} / ${total}`;
+  document.getElementById('progress-bar').style.width = `${(cur+1)/total*100}%`;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='ArrowRight'||e.key===' ') go(cur+1);
+  if (e.key==='ArrowLeft')               go(cur-1);
+  if (e.key>='1'&&e.key<=String(total))  go(Number(e.key)-1);
+});
+document.addEventListener('click', e => {
+  if (e.clientX > window.innerWidth/2) go(cur+1);
+  else go(cur-1);
+});
+
+go(0);
+</script>
+</body>
+</html>
