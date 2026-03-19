@@ -42,6 +42,7 @@ a.logo { text-decoration:none; }
 .score-strip {
   display:flex; align-items:center; gap:6px; padding:0 16px;
   margin-left:auto; border-left:1px solid var(--bd); font-size:.68rem; user-select:none;
+  flex-shrink:0;
 }
 .sc-l { color:var(--muted); }
 .sc-v { font-weight:700; min-width:52px; text-align:right; }

@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from PIL import Image
-from flask import Flask, jsonify, render_template, request, redirect
+from flask import Flask, jsonify, render_template, request, redirect, has_request_context
 
 import torch
 import torch.nn as nn
@@ -16,6 +16,13 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins='*')
+
+def _emit(event, data, to=None):
+    """Use request-context emit() when available, else socketio.emit() for threads."""
+    if has_request_context():
+        emit(event, data, to=to)
+    else:
+        socketio.emit(event, data, to=to)
 
 # ── Config ────────────────────────────────────────────────────────────────────
 CHECKPOINT_DIR = Path('checkpoints')
@@ -339,7 +346,7 @@ def _next_round(code):
     r['state']   = 'playing'
     r['image']   = _sample_image()
     round_num    = r['round']
-    socketio.emit('round_start', {
+    _emit('round_start', {
         'round': round_num, 'rounds': r['rounds'],
         'img': r['image']['img'], 'idx': r['image']['idx'],
         'players': list(r['players'].values()),
@@ -388,8 +395,8 @@ def on_mp_guess(data):
     }
     player['score'] += score
 
-    socketio.emit('guess_count', {'count': len(r['guesses']), 'total': len(r['players'])},
-                  to=code)
+    _emit('guess_count', {'count': len(r['guesses']), 'total': len(r['players'])},
+          to=code)
     emit('my_guess_result', {'dist': round(dist), 'score': score})
 
     if len(r['guesses']) >= len(r['players']):
@@ -409,7 +416,7 @@ def _reveal_round(code):
     ai_lat, ai_lon, ai_conf = ai_predict(row['img_path'])
     ai_dist  = haversine_km(ai_lat, ai_lon, true_lat, true_lon)
     ai_score = calc_score(ai_dist, difficulty=r['difficulty'])
-    socketio.emit('round_results', {
+    _emit('round_results', {
         'true_lat': true_lat, 'true_lon': true_lon,
         'ai_lat':   ai_lat,   'ai_lon':   ai_lon,
         'ai_conf':  round(ai_conf * 100, 1),
@@ -420,6 +427,24 @@ def _reveal_round(code):
         'is_last':  r['round'] >= r['rounds'],
     }, to=code)
 
+@socketio.on('mp_timeout')
+def on_mp_timeout(data):
+    """Host manually ends the round early."""
+    code = data.get('code', '')
+    if code not in _rooms or _rooms[code]['host'] != request.sid:
+        return
+    r = _rooms[code]
+    if r['state'] != 'playing':
+        return
+    # Fill in default guesses for players who haven't guessed yet
+    for sid, p in r['players'].items():
+        if sid not in r['guesses']:
+            r['guesses'][sid] = {
+                'name': p['name'], 'color': p['color'],
+                'lat': 0, 'lon': 0, 'dist': 20000, 'score': 0,
+            }
+    _reveal_round(code)
+
 @socketio.on('mp_next')
 def on_mp_next(data):
     code = data['code']
@@ -427,10 +452,26 @@ def on_mp_next(data):
         return
     r = _rooms[code]
     if r['round'] >= r['rounds']:
-        socketio.emit('game_over', {'scores': _sorted_scores(r)}, to=code)
+        _emit('game_over', {'scores': _sorted_scores(r)}, to=code)
         del _rooms[code]
     else:
         _next_round(code)
+
+@socketio.on('mp_restart')
+def on_mp_restart(data):
+    """Host restarts the game with the same room and players."""
+    code = data.get('code', '')
+    if code not in _rooms or _rooms[code]['host'] != request.sid:
+        return
+    r = _rooms[code]
+    # Reset all player scores
+    for p in r['players'].values():
+        p['score'] = 0
+    r['round']  = 0
+    r['guesses'] = {}
+    r['state']   = 'playing'
+    _emit('mp_restarted', {'players': list(r['players'].values())}, to=code)
+    _next_round(code)
 
 @socketio.on('disconnect')
 def on_disconnect():
@@ -444,7 +485,7 @@ def on_disconnect():
             leave_room(code)
             break
         # During active game: keep player slot (preserves score, guess count)
-        if r['state'] in ('starting', 'playing'):
+        if r['state'] in ('starting', 'playing', 'results'):
             leave_room(code)
             break
         name = r['players'][request.sid]['name']

@@ -15,19 +15,20 @@ def run():
 t = threading.Thread(target=run, daemon=True)
 t.start()
 
+ngrok.kill()  # Kill any existing tunnels from previous sessions
 public_url = ngrok.connect(5000)
 print()
-print('━' * 50)
-print(f'  Öffentlicher Link:')
+print('=' * 50)
+print(f'  Oeffentlicher Link:')
 print(f'  {public_url}')
 print()
-print('  Teile diesen Link – jeder kann mitspielen!')
+print('  Teile diesen Link - jeder kann mitspielen!')
 print('  Beenden: Strg+C')
-print('━' * 50)
+print('=' * 50)
 
 try:
-    input()
-except KeyboardInterrupt:
+    t.join()
+except (KeyboardInterrupt, EOFError):
     pass
 finally:
     ngrok.kill()

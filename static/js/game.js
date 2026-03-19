@@ -214,6 +214,15 @@ function showFinal() {
 }
 
 function restartGame() {
+  if (IS_MULTIPLAYER) {
+    // In multiplayer, host triggers server restart; non-host goes back to home
+    if (typeof mpRestartGame === 'function') {
+      mpRestartGame();
+    } else {
+      window.location.href = '/';
+    }
+    return;
+  }
   round = 1; totalP = 0; totalA = 0; history = [];
   document.getElementById('hdr-p').textContent = '0';
   document.getElementById('hdr-a').textContent = '0';
@@ -228,4 +237,9 @@ function restartGame() {
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
 document.getElementById('hdr-t').textContent = TOTAL_ROUNDS;
-loadGameImage();
+if (IS_MULTIPLAYER) {
+  // Hide singleplayer score strip — multiplayer uses the player strip
+  document.querySelector('.score-strip').style.display = 'none';
+} else {
+  loadGameImage();
+}
