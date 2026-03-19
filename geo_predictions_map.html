@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_0bd3696a973e1a9008af55ee07c98351 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+<div style="position:fixed;bottom:30px;left:30px;z-index:1000;background:white;
+            padding:10px;border-radius:6px;font-size:12px;border:1px solid #ccc">
+  <b>Legende</b><br>
+  🔵 Wahre Position<br>
+  🟢/🟠/🔴 Vorhersage (nach Distanz)<br>
+  ── Abweichung
+</div>
+    
+            <div class="folium-map" id="map_0bd3696a973e1a9008af55ee07c98351" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_0bd3696a973e1a9008af55ee07c98351 = L.map(
+                "map_0bd3696a973e1a9008af55ee07c98351",
+                {
+                    center: [20.0, 0.0],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 2,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_931b19ef64301b882b0bb417e3c6d57b = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_931b19ef64301b882b0bb417e3c6d57b.addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_04c2b89ff1f1479cbe15901631224142 = L.circleMarker(
+                [-27.79883739158193, -50.86263301113096],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_042894cbe4cbb64d9c9957c222cd86f1 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_45051b7a615932696edf9188fe4e0a76 = $(`<div id="html_45051b7a615932696edf9188fe4e0a76" style="width: 100.0%; height: 100.0%;">Wahrheit: ?, Brasilien</div>`)[0];
+                popup_042894cbe4cbb64d9c9957c222cd86f1.setContent(html_45051b7a615932696edf9188fe4e0a76);
+            
+        
+
+        circle_marker_04c2b89ff1f1479cbe15901631224142.bindPopup(popup_042894cbe4cbb64d9c9957c222cd86f1)
+        ;
+
+        
+    
+    
+            var circle_marker_1fb846485c93b8f27af331152ffd97f0 = L.circleMarker(
+                [-25.0, -55.0],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_bad6c884abe61eae5d73128b47ae04f4 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_48dc56d4945d8d05518b1e9e6555ed5d = $(`<div id="html_48dc56d4945d8d05518b1e9e6555ed5d" style="width: 100.0%; height: 100.0%;">Vorhersage: San Alberto, Paraguay | 516 km</div>`)[0];
+                popup_bad6c884abe61eae5d73128b47ae04f4.setContent(html_48dc56d4945d8d05518b1e9e6555ed5d);
+            
+        
+
+        circle_marker_1fb846485c93b8f27af331152ffd97f0.bindPopup(popup_bad6c884abe61eae5d73128b47ae04f4)
+        ;
+
+        
+    
+    
+            var poly_line_46fee26a81bf0187630f1157b75c0757 = L.polyline(
+                [[-27.79883739158193, -50.86263301113096], [-25.0, -55.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_c088ce35ab7514e1f83e38936d4391d1 = L.circleMarker(
+                [-25.94208256813955, 152.9839167515144],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_b2bcdaa67be945d1a5215578e26adc05 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_a6699f4bbce284c2026ffff4311eded0 = $(`<div id="html_a6699f4bbce284c2026ffff4311eded0" style="width: 100.0%; height: 100.0%;">Wahrheit: ?, Australien</div>`)[0];
+                popup_b2bcdaa67be945d1a5215578e26adc05.setContent(html_a6699f4bbce284c2026ffff4311eded0);
+            
+        
+
+        circle_marker_c088ce35ab7514e1f83e38936d4391d1.bindPopup(popup_b2bcdaa67be945d1a5215578e26adc05)
+        ;
+
+        
+    
+    
+            var circle_marker_e5063070f9bdd4357b5f35d29f6192fb = L.circleMarker(
+                [-25.0, 145.0],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_0733b5e66e36d6192872753017da96ff = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_e0e5abc595f2e693fac66119078f11ed = $(`<div id="html_e0e5abc595f2e693fac66119078f11ed" style="width: 100.0%; height: 100.0%;">Vorhersage: ?, Australien | 808 km</div>`)[0];
+                popup_0733b5e66e36d6192872753017da96ff.setContent(html_e0e5abc595f2e693fac66119078f11ed);
+            
+        
+
+        circle_marker_e5063070f9bdd4357b5f35d29f6192fb.bindPopup(popup_0733b5e66e36d6192872753017da96ff)
+        ;
+
+        
+    
+    
+            var poly_line_be33c10bf67e89f83554b11ae45c6d1b = L.polyline(
+                [[-25.94208256813955, 152.9839167515144], [-25.0, 145.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_db699582a7deead9fd217ff63e0c3ba7 = L.circleMarker(
+                [-37.89179453328712, -69.67129445347338],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_7261ab30d4c811449c22e2ecfe37d1b4 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_0028a5c34d3c407cb9de60eda1798185 = $(`<div id="html_0028a5c34d3c407cb9de60eda1798185" style="width: 100.0%; height: 100.0%;">Wahrheit: ?, Argentinien</div>`)[0];
+                popup_7261ab30d4c811449c22e2ecfe37d1b4.setContent(html_0028a5c34d3c407cb9de60eda1798185);
+            
+        
+
+        circle_marker_db699582a7deead9fd217ff63e0c3ba7.bindPopup(popup_7261ab30d4c811449c22e2ecfe37d1b4)
+        ;
+
+        
+    
+    
+            var circle_marker_b8a2f506c0617fba67ea8e8ff3565513 = L.circleMarker(
+                [-45.0, -65.0],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_21a48fbc4ea382c17d64e389578950df = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_a2a91ed5bf898181c58bc9635eb0109a = $(`<div id="html_a2a91ed5bf898181c58bc9635eb0109a" style="width: 100.0%; height: 100.0%;">Vorhersage: ?, ? | 881 km</div>`)[0];
+                popup_21a48fbc4ea382c17d64e389578950df.setContent(html_a2a91ed5bf898181c58bc9635eb0109a);
+            
+        
+
+        circle_marker_b8a2f506c0617fba67ea8e8ff3565513.bindPopup(popup_21a48fbc4ea382c17d64e389578950df)
+        ;
+
+        
+    
+    
+            var poly_line_a6c4fb30c4272ebfa3ac0e190832a84c = L.polyline(
+                [[-37.89179453328712, -69.67129445347338], [-45.0, -65.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_5c8f11d97a469ba16085f9a65698e708 = L.circleMarker(
+                [45.45317806961014, 19.61546590076306],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_670bade55f436ea58fe4c45cb9d27a24 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_47e5943fc250f2afd7ce8995f056c609 = $(`<div id="html_47e5943fc250f2afd7ce8995f056c609" style="width: 100.0%; height: 100.0%;">Wahrheit: Gemeinde Werbass, Serbien</div>`)[0];
+                popup_670bade55f436ea58fe4c45cb9d27a24.setContent(html_47e5943fc250f2afd7ce8995f056c609);
+            
+        
+
+        circle_marker_5c8f11d97a469ba16085f9a65698e708.bindPopup(popup_670bade55f436ea58fe4c45cb9d27a24)
+        ;
+
+        
+    
+    
+            var circle_marker_b23c5f3dba5183a2e28d8a39054b0af5 = L.circleMarker(
+                [45.0, 25.0],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_83d6977f16d298c4f130b28fceae742e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_608d254e8393d6aeb8945d60f258823f = $(`<div id="html_608d254e8393d6aeb8945d60f258823f" style="width: 100.0%; height: 100.0%;">Vorhersage: Argisch, Rumänien | 425 km</div>`)[0];
+                popup_83d6977f16d298c4f130b28fceae742e.setContent(html_608d254e8393d6aeb8945d60f258823f);
+            
+        
+
+        circle_marker_b23c5f3dba5183a2e28d8a39054b0af5.bindPopup(popup_83d6977f16d298c4f130b28fceae742e)
+        ;
+
+        
+    
+    
+            var poly_line_e08744657bd01650041417929e6b0f98 = L.polyline(
+                [[45.45317806961014, 19.61546590076306], [45.0, 25.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_8874771183258c051747c334276d337c = L.circleMarker(
+                [45.61946693120889, 45.86261963941092],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_c35021ee2b7bf76b5e69b90d3caa908e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_f4057f19de6e05ab3d936ddab82497d0 = $(`<div id="html_f4057f19de6e05ab3d936ddab82497d0" style="width: 100.0%; height: 100.0%;">Wahrheit: Черноземельский район, Russland</div>`)[0];
+                popup_c35021ee2b7bf76b5e69b90d3caa908e.setContent(html_f4057f19de6e05ab3d936ddab82497d0);
+            
+        
+
+        circle_marker_8874771183258c051747c334276d337c.bindPopup(popup_c35021ee2b7bf76b5e69b90d3caa908e)
+        ;
+
+        
+    
+    
+            var circle_marker_a76f2e058e4845fae40fa5a4c7c5d968 = L.circleMarker(
+                [45.0, 45.0],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_61331bb9d10449143d38330afe00bfef = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_6699109d5fc65b9002423ab63da04dbf = $(`<div id="html_6699109d5fc65b9002423ab63da04dbf" style="width: 100.0%; height: 100.0%;">Vorhersage: Левокумский муниципальный округ, Russland | 96 km</div>`)[0];
+                popup_61331bb9d10449143d38330afe00bfef.setContent(html_6699109d5fc65b9002423ab63da04dbf);
+            
+        
+
+        circle_marker_a76f2e058e4845fae40fa5a4c7c5d968.bindPopup(popup_61331bb9d10449143d38330afe00bfef)
+        ;
+
+        
+    
+    
+            var poly_line_53b2d297ca671dfa86c445cbb76beb62 = L.polyline(
+                [[45.61946693120889, 45.86261963941092], [45.0, 45.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_f7f2cc877c4f6b35eef1ffdca1cff5c0 = L.circleMarker(
+                [13.3909236792307, -11.64120229594801],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_5c23aff8798f2cef287f384f45945550 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_c64eb8caf4ce4c9c300d1907f6f1ea4d = $(`<div id="html_c64eb8caf4ce4c9c300d1907f6f1ea4d" style="width: 100.0%; height: 100.0%;">Wahrheit: Communauté rurale de Missirah Sirimana, Senegal</div>`)[0];
+                popup_5c23aff8798f2cef287f384f45945550.setContent(html_c64eb8caf4ce4c9c300d1907f6f1ea4d);
+            
+        
+
+        circle_marker_f7f2cc877c4f6b35eef1ffdca1cff5c0.bindPopup(popup_5c23aff8798f2cef287f384f45945550)
+        ;
+
+        
+    
+    
+            var circle_marker_fd464ce4cff9af30b38cf87a64406d65 = L.circleMarker(
+                [15.0, -15.0],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_02f048cad4fa3d660d74711712b43581 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_13d5cab08e75121f5656de09dea759dd = $(`<div id="html_13d5cab08e75121f5656de09dea759dd" style="width: 100.0%; height: 100.0%;">Vorhersage: Communauté rurale de Thiel, Senegal | 404 km</div>`)[0];
+                popup_02f048cad4fa3d660d74711712b43581.setContent(html_13d5cab08e75121f5656de09dea759dd);
+            
+        
+
+        circle_marker_fd464ce4cff9af30b38cf87a64406d65.bindPopup(popup_02f048cad4fa3d660d74711712b43581)
+        ;
+
+        
+    
+    
+            var poly_line_c10846486340fad7115bec3b365b9f83 = L.polyline(
+                [[13.3909236792307, -11.64120229594801], [15.0, -15.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_45dae8c617a700540fed73ed1448808b = L.circleMarker(
+                [0.1819391577303848, -60.53813734913476],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_e012ea99a2004f91d841ce634bcd1865 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_23513aea191cd5101e23b835c5eb3163 = $(`<div id="html_23513aea191cd5101e23b835c5eb3163" style="width: 100.0%; height: 100.0%;">Wahrheit: ?, Brasilien</div>`)[0];
+                popup_e012ea99a2004f91d841ce634bcd1865.setContent(html_23513aea191cd5101e23b835c5eb3163);
+            
+        
+
+        circle_marker_45dae8c617a700540fed73ed1448808b.bindPopup(popup_e012ea99a2004f91d841ce634bcd1865)
+        ;
+
+        
+    
+    
+            var circle_marker_ac643f1f4e70b9c3a24c1b91c00a125d = L.circleMarker(
+                [5.0, -75.0],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_333dd0d8d4aa3fae421196a4664796c7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_11de07d0309449af7f5c71bfc740aeb0 = $(`<div id="html_11de07d0309449af7f5c71bfc740aeb0" style="width: 100.0%; height: 100.0%;">Vorhersage: Armero, Kolumbien | 1,693 km</div>`)[0];
+                popup_333dd0d8d4aa3fae421196a4664796c7.setContent(html_11de07d0309449af7f5c71bfc740aeb0);
+            
+        
+
+        circle_marker_ac643f1f4e70b9c3a24c1b91c00a125d.bindPopup(popup_333dd0d8d4aa3fae421196a4664796c7)
+        ;
+
+        
+    
+    
+            var poly_line_8b0e7ca4bdf501110a58c0c62a65441b = L.polyline(
+                [[0.1819391577303848, -60.53813734913476], [5.0, -75.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_d1045d41fee1886678c7db646742db26 = L.circleMarker(
+                [16.77616897934753, -3.005472454826307],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_02b1a0c8d760c79b2b927f4e6f73ad55 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_24b60ad43c4a1100c3d938a2cc54cf53 = $(`<div id="html_24b60ad43c4a1100c3d938a2cc54cf53" style="width: 100.0%; height: 100.0%;">Wahrheit: Timbuktu, Mali</div>`)[0];
+                popup_02b1a0c8d760c79b2b927f4e6f73ad55.setContent(html_24b60ad43c4a1100c3d938a2cc54cf53);
+            
+        
+
+        circle_marker_d1045d41fee1886678c7db646742db26.bindPopup(popup_02b1a0c8d760c79b2b927f4e6f73ad55)
+        ;
+
+        
+    
+    
+            var circle_marker_f0b87d870d69928ad20e77372d77f507 = L.circleMarker(
+                [15.0, -5.0],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_298f8df684d9bf0ba7e9d3ab18baafbe = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_28a5a26117d8bd33019da9f842913c2f = $(`<div id="html_28a5a26117d8bd33019da9f842913c2f" style="width: 100.0%; height: 100.0%;">Vorhersage: Cercle de Tenenkou, Mali | 291 km</div>`)[0];
+                popup_298f8df684d9bf0ba7e9d3ab18baafbe.setContent(html_28a5a26117d8bd33019da9f842913c2f);
+            
+        
+
+        circle_marker_f0b87d870d69928ad20e77372d77f507.bindPopup(popup_298f8df684d9bf0ba7e9d3ab18baafbe)
+        ;
+
+        
+    
+    
+            var poly_line_2ddfffb9bc3aadcddd09f7fe4ea058b6 = L.polyline(
+                [[16.77616897934753, -3.005472454826307], [15.0, -5.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_d708359659058511eef6e32101b885ce = L.circleMarker(
+                [-31.55715693577757, 27.62599751269116],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_62d630b0a5668ef38e69aa0de0aef2fb = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_cae449fd6babc5c07fe3305b66494375 = $(`<div id="html_cae449fd6babc5c07fe3305b66494375" style="width: 100.0%; height: 100.0%;">Wahrheit: Sakhisizwe Local Municipality, Südafrika</div>`)[0];
+                popup_62d630b0a5668ef38e69aa0de0aef2fb.setContent(html_cae449fd6babc5c07fe3305b66494375);
+            
+        
+
+        circle_marker_d708359659058511eef6e32101b885ce.bindPopup(popup_62d630b0a5668ef38e69aa0de0aef2fb)
+        ;
+
+        
+    
+    
+            var circle_marker_5f62e4ca36e530bbf628d8ba9173865d = L.circleMarker(
+                [-35.0, 25.0],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_0e055fb1234c6d66ec28307535f25269 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_a8d1f4abf527737511a4dbc52f2394ac = $(`<div id="html_a8d1f4abf527737511a4dbc52f2394ac" style="width: 100.0%; height: 100.0%;">Vorhersage: ?, ? | 454 km</div>`)[0];
+                popup_0e055fb1234c6d66ec28307535f25269.setContent(html_a8d1f4abf527737511a4dbc52f2394ac);
+            
+        
+
+        circle_marker_5f62e4ca36e530bbf628d8ba9173865d.bindPopup(popup_0e055fb1234c6d66ec28307535f25269)
+        ;
+
+        
+    
+    
+            var poly_line_a94558328086fa9a4aeef9389718e306 = L.polyline(
+                [[-31.55715693577757, 27.62599751269116], [-35.0, 25.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_3855b40dd3c4fc0f28e312ad9fe43edd = L.circleMarker(
+                [-23.77816787936692, -66.8006116852154],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_3876eb72a6ee3f6739f17bad1bfd75f7 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_303619d0d49cb88ea32cbe3d8f1825bc = $(`<div id="html_303619d0d49cb88ea32cbe3d8f1825bc" style="width: 100.0%; height: 100.0%;">Wahrheit: Municipio de Susques, Argentinien</div>`)[0];
+                popup_3876eb72a6ee3f6739f17bad1bfd75f7.setContent(html_303619d0d49cb88ea32cbe3d8f1825bc);
+            
+        
+
+        circle_marker_3855b40dd3c4fc0f28e312ad9fe43edd.bindPopup(popup_3876eb72a6ee3f6739f17bad1bfd75f7)
+        ;
+
+        
+    
+    
+            var circle_marker_29caff58eb9276ce0e903e2c8d6bc364 = L.circleMarker(
+                [-45.0, -65.0],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_cdee39ac5cfe144b730f8de854270859 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_905f168a76d9f4bc8bd14bcc31a9b751 = $(`<div id="html_905f168a76d9f4bc8bd14bcc31a9b751" style="width: 100.0%; height: 100.0%;">Vorhersage: ?, ? | 2,365 km</div>`)[0];
+                popup_cdee39ac5cfe144b730f8de854270859.setContent(html_905f168a76d9f4bc8bd14bcc31a9b751);
+            
+        
+
+        circle_marker_29caff58eb9276ce0e903e2c8d6bc364.bindPopup(popup_cdee39ac5cfe144b730f8de854270859)
+        ;
+
+        
+    
+    
+            var poly_line_4e88e000b8fefe06d7fbc8e6ef3a3954 = L.polyline(
+                [[-23.77816787936692, -66.8006116852154], [-45.0, -65.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_8d8aaa1a2651113c573b3abb8391706e = L.circleMarker(
+                [15.35080384875457, 100.3880291507354],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_c46c62bcf46958ee84c50e2f16c72089 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_3c4bcfb26765b65a1b97035365f452e8 = $(`<div id="html_3c4bcfb26765b65a1b97035365f452e8" style="width: 100.0%; height: 100.0%;">Wahrheit: อำเภอตาคลี, Thailand</div>`)[0];
+                popup_c46c62bcf46958ee84c50e2f16c72089.setContent(html_3c4bcfb26765b65a1b97035365f452e8);
+            
+        
+
+        circle_marker_8d8aaa1a2651113c573b3abb8391706e.bindPopup(popup_c46c62bcf46958ee84c50e2f16c72089)
+        ;
+
+        
+    
+    
+            var circle_marker_3bf8202aee8a2557e44d5f2639185248 = L.circleMarker(
+                [15.0, 105.0],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_515a3af3da91233d7c048841606e44fd = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_4beccf5a6b517b07ebbefda3b59118a9 = $(`<div id="html_4beccf5a6b517b07ebbefda3b59118a9" style="width: 100.0%; height: 100.0%;">Vorhersage: อำเภอเดชอุดม, Thailand | 496 km</div>`)[0];
+                popup_515a3af3da91233d7c048841606e44fd.setContent(html_4beccf5a6b517b07ebbefda3b59118a9);
+            
+        
+
+        circle_marker_3bf8202aee8a2557e44d5f2639185248.bindPopup(popup_515a3af3da91233d7c048841606e44fd)
+        ;
+
+        
+    
+    
+            var poly_line_2dda4e1beb6ff46b82b2ccfb76450d8a = L.polyline(
+                [[15.35080384875457, 100.3880291507354], [15.0, 105.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_64d191a8490f9603c3d89fa306ac1bc1 = L.circleMarker(
+                [-31.58835865596759, 21.13170683668939],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_f940e24650c16fefde51ba223d9bcd33 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_3505b70ebc398a809dd22caa65d922b5 = $(`<div id="html_3505b70ebc398a809dd22caa65d922b5" style="width: 100.0%; height: 100.0%;">Wahrheit: Karoo Hoogland Local Municipality, Südafrika</div>`)[0];
+                popup_f940e24650c16fefde51ba223d9bcd33.setContent(html_3505b70ebc398a809dd22caa65d922b5);
+            
+        
+
+        circle_marker_64d191a8490f9603c3d89fa306ac1bc1.bindPopup(popup_f940e24650c16fefde51ba223d9bcd33)
+        ;
+
+        
+    
+    
+            var circle_marker_7d48f14ba6fcd2d4b1193e611614c3fc = L.circleMarker(
+                [-35.0, 25.0],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_134edfa5e5588edc1ad1aba859e0f3f3 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_11065a71034146ffad91284eb3c8011f = $(`<div id="html_11065a71034146ffad91284eb3c8011f" style="width: 100.0%; height: 100.0%;">Vorhersage: ?, ? | 523 km</div>`)[0];
+                popup_134edfa5e5588edc1ad1aba859e0f3f3.setContent(html_11065a71034146ffad91284eb3c8011f);
+            
+        
+
+        circle_marker_7d48f14ba6fcd2d4b1193e611614c3fc.bindPopup(popup_134edfa5e5588edc1ad1aba859e0f3f3)
+        ;
+
+        
+    
+    
+            var poly_line_9ed1ce502efbdd1bf8b8f0fe1d6faa3e = L.polyline(
+                [[-31.58835865596759, 21.13170683668939], [-35.0, 25.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_61705d720c9f3cb845ca278b84af4407 = L.circleMarker(
+                [40.13717025045431, 32.22989251645055],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_fb98a81756a13a7822c0e5b749b7caab = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_ffa6fb7aea75d57712979039a667a9d5 = $(`<div id="html_ffa6fb7aea75d57712979039a667a9d5" style="width: 100.0%; height: 100.0%;">Wahrheit: Güdül, Türkei</div>`)[0];
+                popup_fb98a81756a13a7822c0e5b749b7caab.setContent(html_ffa6fb7aea75d57712979039a667a9d5);
+            
+        
+
+        circle_marker_61705d720c9f3cb845ca278b84af4407.bindPopup(popup_fb98a81756a13a7822c0e5b749b7caab)
+        ;
+
+        
+    
+    
+            var circle_marker_326c493a5a329f48731669aa2e465727 = L.circleMarker(
+                [-35.0, 25.0],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_47f390c7383f4f657fc29421a788316e = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_238ec2c7629597666e82ec8f61c7b0ce = $(`<div id="html_238ec2c7629597666e82ec8f61c7b0ce" style="width: 100.0%; height: 100.0%;">Vorhersage: ?, ? | 8,388 km</div>`)[0];
+                popup_47f390c7383f4f657fc29421a788316e.setContent(html_238ec2c7629597666e82ec8f61c7b0ce);
+            
+        
+
+        circle_marker_326c493a5a329f48731669aa2e465727.bindPopup(popup_47f390c7383f4f657fc29421a788316e)
+        ;
+
+        
+    
+    
+            var poly_line_dba3ce576f913183b61dcb50d79cdbf5 = L.polyline(
+                [[40.13717025045431, 32.22989251645055], [-35.0, 25.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_16465af71574d2d4470f7421f4011205 = L.circleMarker(
+                [-13.72181615358906, 131.9129658731001],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_02223e159be5944e70714831587c0842 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_9dfe37af6662a4a854bd4123ce0c79a7 = $(`<div id="html_9dfe37af6662a4a854bd4123ce0c79a7" style="width: 100.0%; height: 100.0%;">Wahrheit: Victoria Daly Region, Australien</div>`)[0];
+                popup_02223e159be5944e70714831587c0842.setContent(html_9dfe37af6662a4a854bd4123ce0c79a7);
+            
+        
+
+        circle_marker_16465af71574d2d4470f7421f4011205.bindPopup(popup_02223e159be5944e70714831587c0842)
+        ;
+
+        
+    
+    
+            var circle_marker_1527e3883cd2290593e6cda0d192904b = L.circleMarker(
+                [-25.0, 145.0],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_735969ec7659920b80a24280781d64db = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_f02fd53faca4b90e235979758592046e = $(`<div id="html_f02fd53faca4b90e235979758592046e" style="width: 100.0%; height: 100.0%;">Vorhersage: ?, Australien | 1,857 km</div>`)[0];
+                popup_735969ec7659920b80a24280781d64db.setContent(html_f02fd53faca4b90e235979758592046e);
+            
+        
+
+        circle_marker_1527e3883cd2290593e6cda0d192904b.bindPopup(popup_735969ec7659920b80a24280781d64db)
+        ;
+
+        
+    
+    
+            var poly_line_3e7b6a53ef8de48c6259b9fe8981efd9 = L.polyline(
+                [[-13.72181615358906, 131.9129658731001], [-25.0, 145.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_5c823fec0f9509c8fb1c91169e41bc8c = L.circleMarker(
+                [-22.68377900654065, -46.92916296946117],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_630ed73764fda0e72c123b55598294ef = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_602420edfd3af64467b9ac3646938dab = $(`<div id="html_602420edfd3af64467b9ac3646938dab" style="width: 100.0%; height: 100.0%;">Wahrheit: Região Metropolitana de Campinas, Brasilien</div>`)[0];
+                popup_630ed73764fda0e72c123b55598294ef.setContent(html_602420edfd3af64467b9ac3646938dab);
+            
+        
+
+        circle_marker_5c823fec0f9509c8fb1c91169e41bc8c.bindPopup(popup_630ed73764fda0e72c123b55598294ef)
+        ;
+
+        
+    
+    
+            var circle_marker_642b5a5c8a3e8138efd9978e9b83d07a = L.circleMarker(
+                [15.0, -15.0],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_1c229efaf5ed1a2dabd2452ab3a35746 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_9673da6e988f6bf790ba0b2e776c4224 = $(`<div id="html_9673da6e988f6bf790ba0b2e776c4224" style="width: 100.0%; height: 100.0%;">Vorhersage: Communauté rurale de Thiel, Senegal | 5,444 km</div>`)[0];
+                popup_1c229efaf5ed1a2dabd2452ab3a35746.setContent(html_9673da6e988f6bf790ba0b2e776c4224);
+            
+        
+
+        circle_marker_642b5a5c8a3e8138efd9978e9b83d07a.bindPopup(popup_1c229efaf5ed1a2dabd2452ab3a35746)
+        ;
+
+        
+    
+    
+            var poly_line_d5deb7077c84c7ce618d8d6d2ab7af5e = L.polyline(
+                [[-22.68377900654065, -46.92916296946117], [15.0, -15.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+            var circle_marker_185b0dcd4dbf1625cfc1724055c82e4c = L.circleMarker(
+                [47.59019302863123, 18.04516314402564],
+                {"bubblingMouseEvents": true, "color": "blue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_1c00b02d939ab6527f7b9abe3f5b4ea0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_27a8fcc81be42278e915bf5e987af28e = $(`<div id="html_27a8fcc81be42278e915bf5e987af28e" style="width: 100.0%; height: 100.0%;">Wahrheit: Csép, Ungarn</div>`)[0];
+                popup_1c00b02d939ab6527f7b9abe3f5b4ea0.setContent(html_27a8fcc81be42278e915bf5e987af28e);
+            
+        
+
+        circle_marker_185b0dcd4dbf1625cfc1724055c82e4c.bindPopup(popup_1c00b02d939ab6527f7b9abe3f5b4ea0)
+        ;
+
+        
+    
+    
+            var circle_marker_ccf19f18d235d448abcac4e8b51bb23b = L.circleMarker(
+                [55.0, 25.0],
+                {"bubblingMouseEvents": true, "color": "orange", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "orange", "fillOpacity": 0.85, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7, "stroke": true, "weight": 3}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+    
+        var popup_f8c38ac646af7ef0dacf00a2233e11dd = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_a4c16834797f72757d4af4b91b2a1323 = $(`<div id="html_a4c16834797f72757d4af4b91b2a1323" style="width: 100.0%; height: 100.0%;">Vorhersage: Širvintų seniūnija, Litauen | 954 km</div>`)[0];
+                popup_f8c38ac646af7ef0dacf00a2233e11dd.setContent(html_a4c16834797f72757d4af4b91b2a1323);
+            
+        
+
+        circle_marker_ccf19f18d235d448abcac4e8b51bb23b.bindPopup(popup_f8c38ac646af7ef0dacf00a2233e11dd)
+        ;
+
+        
+    
+    
+            var poly_line_caefa0f6b793d0d7836b4651541f6805 = L.polyline(
+                [[47.59019302863123, 18.04516314402564], [55.0, 25.0]],
+                {"bubblingMouseEvents": true, "color": "gray", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "gray", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.5, "smoothFactor": 1.0, "stroke": true, "weight": 1.5}
+            ).addTo(map_0bd3696a973e1a9008af55ee07c98351);
+        
+</script>
+</html>
